@@ -5,5 +5,41 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "argon2-cffi>=25.1.0",
     "django>=6.1.1",
+    "django-cors-headers>=4.9.0",
+    "django-countries>=9.0.0",
+    "django-environ>=0.14.0",
+    "django-filter>=26.1",
+    "django-phonenumber-field>=8.5.0",
+    "djangorestframework>=3.18.0",
+    "drf-yasg>=1.21.15",
+    "phonenumbers>=9.0.38",
+    "pillow>=12.3.0",
+    "pytz>=2026.3.post1",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.5",
+]
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    ".git",
+    ".tox",
+    "*env*",
+    "*venv*",
+    "__pycache__",
+    "*/migrations/*",
+    "*/staticfiles/*",
+    "*/mediafiles/*",
+    "node_modules",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
