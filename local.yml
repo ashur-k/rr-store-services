@@ -27,10 +27,11 @@ services:
       - rr-store
   
   postgres:
-    image: postgres:17
-    container_name: postgres
+    build:
+      context: ./infrastructure/local/postgres/
+      dockerfile: Dockerfile
     volumes:
-      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data:/var/lib/postgresql
       - local_postgres_data_backups:/backups
     env_file:
       - ./services/user-service/.envs/local/.env-postgres
