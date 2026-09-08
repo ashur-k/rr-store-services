@@ -17,6 +17,7 @@ dependencies = [
     "drf-yasg>=1.21.15",
     "phonenumbers>=9.0.38",
     "pillow>=12.3.0",
+    "psycopg[binary]>=3.3.5",
     "pytz>=2026.3.post1",
 ]
 

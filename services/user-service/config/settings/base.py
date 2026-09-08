@@ -5,7 +5,6 @@ import environ
 env = environ.Env()
 env.read_env()
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -71,18 +70,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+# DATABASES = {"default": env.db("DATABASE_URL")}
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB", default="postgres"),
+        "USER": env("POSTGRES_USER", default="admin"),
+        "PASSWORD": env("POSTGRES_PASSWORD", default="postgres"),
+        "HOST": env("POSTGRES_HOST", default="postgres"),
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
 }
-
-# DATABASES = {"default": env.db("DATABASE_URL")}
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -129,7 +128,10 @@ ADMIN_URL = "supersecret"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
+# STATIC_URL = "static/"
+
 STATIC_URL = "static/"
+STATIC_ROOT = ROOT_DIR / "staticfiles"
 
 
 # Email

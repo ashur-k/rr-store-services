@@ -1,0 +1,63 @@
+services:
+  user-service:
+    build:
+      context: ./services/user-service/
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/user-service:/app
+      - user_service_venv:/app/.venv
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./services/user-service/.envs/local/.env-user-service
+      - ./services/user-service/.envs/local/.env-postgres
+    depends_on:
+      - postgres
+      - mailhog
+    command:
+      sh -c "
+        uv sync &&
+        python manage.py migrate --no-input &&
+        python manage.py collectstatic --no-input &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+    networks:
+      - rr-store
+  
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./services/user-service/.envs/local/.env-postgres
+    networks:
+      - rr-store
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    container_name: mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - rr-store
+
+networks:
+  rr-store:
+    driver: bridge
+
+volumes:
+  user_service_venv:
+  static_volume:
+  media_volume:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+  
