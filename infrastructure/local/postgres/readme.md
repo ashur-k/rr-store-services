@@ -101,21 +101,6 @@ docker compose -f local.yml ps postgres
 docker compose -f local.yml exec postgres sh
 ```
 
-### Check Backup Files
-
-```bash
-docker compose -f local.yml exec postgres backups.sh
-```
-
-### Create Backup
-
-```bash
-docker compose -f local.yml exec postgres backup.sh
-```
-
-### Restore Backup
-
-```bash
 docker compose -f local.yml exec postgres restore.sh <backup_filename>
 ```
 

@@ -130,7 +130,7 @@ ADMIN_URL = "supersecret"
 
 # STATIC_URL = "static/"
 
-STATIC_URL = "static/"
+STATIC_URL = "/staticfiles/"
 STATIC_ROOT = ROOT_DIR / "staticfiles"
 
 

@@ -8,8 +8,8 @@ services:
       - user_service_venv:/app/.venv
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     env_file:
       - ./services/user-service/.envs/local/.env-user-service
       - ./services/user-service/.envs/local/.env-postgres
@@ -48,6 +48,21 @@ services:
     container_name: mailhog
     ports:
       - "8025:8025"
+    networks:
+      - rr-store
+  
+  nginx:
+    restart: always
+    depends_on:
+      - user-service
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    build:
+      context: ./infrastructure/local/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
     networks:
       - rr-store
 
