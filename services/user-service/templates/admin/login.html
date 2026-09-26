@@ -1,0 +1,10 @@
+# templates/admin/login.html
+{% extends "admin/login.html" %}
+{% block content %}
+{{ block.super }}
+<div style="text-align: center; margin-top: 20px;">
+    <a href="{% url 'oidc_authentication_init' %}">
+        Login with Keycloak
+    </a>
+</div>
+{% endblock %}
