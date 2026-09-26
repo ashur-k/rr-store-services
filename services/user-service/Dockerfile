@@ -9,6 +9,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.19 /uv /uvx /bin/
 WORKDIR /app
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    gcc \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -34,6 +35,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    gcc \
     libpq5 \
     gettext \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
