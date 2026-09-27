@@ -65,7 +65,7 @@ class KeycloakJWTAuthenticationTests(TestCase):
     def test_authenticate_syncs_user_roles_from_keycloak(self):
         kc_id = uuid4()
 
-        user = User.objects.create_user(
+        User.objects.create_user(
             username="test@example.com",
             email="test@example.com",
             kc_id=kc_id,

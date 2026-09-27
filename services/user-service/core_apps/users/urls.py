@@ -1,13 +1,19 @@
 from django.urls import path
 
-from .views import OIDCBackchannelLogoutView
-from .views.admin_user_list import AdminUserListView
-from .views.health import HealthView
-from .views.item_list import ItemListView
-from .views.protected_report import protected_report
-from .views.user_profile import UserProfileView
+from .views import (
+    AdminUserListView,
+    HealthView,
+    ItemListView,
+    OIDCBackchannelLogoutView,
+    UserDetailView,
+    UserListCreateView,
+    UserProfileView,
+    protected_report,
+)
 
 urlpatterns = [
+    path("", UserListCreateView.as_view(), name="user-list-create"),
+    path("<int:user_id>/", UserDetailView.as_view(), name="user-detail"),
     path("health/", HealthView.as_view(), name="health"),
     path("me/", UserProfileView.as_view(), name="user-profile"),
     path("items/", ItemListView.as_view(), name="item-list"),

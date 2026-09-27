@@ -41,8 +41,8 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "config.apps.ConfigAppConfig",
-    "core_apps.common",
-    "core_apps.profiles",
+    "core_apps.common.apps.CommonConfig",
+    "core_apps.profiles.apps.ProfilesConfig",
     "core_apps.users.apps.UsersConfig",
 ]
 
@@ -211,6 +211,7 @@ LOGIN_URL = "/oidc/authenticate/"
 LOGIN_REDIRECT_URL = "/admin/"
 
 
+
 # --- Django REST Framework ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -222,6 +223,9 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
+    "EXCEPTION_HANDLER": (
+        "core_apps.common.exceptions_handlers.handle_application_exception"
+    ),
 }
 
 # --- CORS ---

@@ -16,6 +16,7 @@ dependencies = [
     "django-phonenumber-field>=8.5.0",
     "djangorestframework>=3.18.0",
     "drf-yasg>=1.21.15",
+    "email-validator>=2.3.0",
     "mozilla-django-oidc>=5.0.2",
     "phonenumbers>=9.0.38",
     "pillow>=12.3.0",

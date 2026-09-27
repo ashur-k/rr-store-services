@@ -3,4 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    kc_id = models.UUIDField(unique=True, editable=False)
+    kc_id = models.UUIDField(
+        unique=True,
+        editable=False,
+        db_index=True,
+    )

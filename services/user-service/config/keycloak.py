@@ -9,14 +9,25 @@ class KeycloakSettings(BaseSettings):
         extra="ignore",
     )
 
-    internal_base: str = Field(alias="KC_BASE")
-    public_base: str = Field(alias="KC_BROWSER_BASE")
+    server_url: str = Field(alias="KC_SERVER_URL")
+    browser_server_url: str = Field(alias="KC_BROWSER_SERVER_URL")
+    realm: str = Field(alias="KC_REALM")
 
     client_id: str = Field(alias="OIDC_RP_CLIENT_ID")
     client_secret: str = Field(alias="OIDC_RP_CLIENT_SECRET")
 
+    admin_client_id: str = Field(alias="KC_ADMIN_CLIENT_ID")
+    admin_client_secret: str = Field(alias="KC_ADMIN_CLIENT_SECRET")
+
     sign_algorithm: str = "RS256"
+
+    @property
+    def internal_base(self) -> str:
+        return f"{self.server_url}/realms/{self.realm}"
     
+    @property
+    def public_base(self) -> str:
+        return f"{self.browser_server_url}/realms/{self.realm}"
 
     @property
     def authorization_endpoint(self) -> str:
