@@ -1,13 +1,20 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from "react-router-dom";
+import Header from "../navigation/Header";
+import Footer from "../footer/Footer";
+import { Container } from 'react-bootstrap'
 
-import { Navbar } from './Navbar'
+export default function MainLayout() {
 
-export function MainLayout() {
   return (
     <>
-      <Navbar />
-
-      <Outlet />
+      <Header/>
+      
+      <main className="py-5">
+        <Container>
+          <Outlet />
+        </Container>
+      </main>
+      <Footer/>
     </>
-  )
+  );
 }
