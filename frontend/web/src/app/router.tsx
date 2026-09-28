@@ -4,6 +4,8 @@ import MainLayout from "../components/layout/MainLayout";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { HomePage } from "../pages/HomePage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { ManageUsersPage } from "../pages/ManageUsersPage";
+import { RoleProtectedRoute } from "../components/auth/RoleProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +22,14 @@ export const router = createBrowserRouter([
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/users",
+        element: (
+          <RoleProtectedRoute roles={["admin", "staff"]}>
+            <ManageUsersPage />
+          </RoleProtectedRoute>
         ),
       },
     ],

@@ -65,6 +65,13 @@ class IsKeycloakAdminOrStaff(BasePermission):
 
         all_roles = set(realm_roles + client_roles)
 
+        if request.method == "DELETE":
+            user_id = view.kwargs.get("user_id")
+
+            # Admin/staff cannot delete their own account.
+            if str(request.user.id) == str(user_id):
+                return False
+
         return bool(all_roles & self.allowed_roles)
 
 
