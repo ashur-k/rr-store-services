@@ -45,7 +45,7 @@ jobs:
         working-directory: services/user-service
         run: uv run ruff check .
 
-      - name: Run Django tests
+      - name: Run Django tests with coverage
         working-directory: services/user-service
         env:
           POSTGRES_HOST: localhost
@@ -61,6 +61,12 @@ jobs:
           OIDC_RP_CLIENT_SECRET: test-secret
           KC_ADMIN_CLIENT_ID: test-admin-client
           KC_ADMIN_CLIENT_SECRET: test-admin-secret
+
+        run: uv run coverage run manage.py test
+
+      - name: Check backend coverage
+        working-directory: services/user-service
+        run: uv run coverage report
 
         run: uv run python manage.py test
 
