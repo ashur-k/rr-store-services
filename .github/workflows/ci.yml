@@ -41,6 +41,10 @@ jobs:
         working-directory: services/user-service
         run: uv sync
 
+      - name: Run Ruff
+        working-directory: services/user-service
+        run: uv run ruff check .
+
       - name: Run Django tests
         working-directory: services/user-service
         env:
