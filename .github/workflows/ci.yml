@@ -49,4 +49,13 @@ jobs:
           POSTGRES_DB: user-service
           POSTGRES_USER: admin
           POSTGRES_PASSWORD: postgres
+
+          KC_SERVER_URL: http://localhost:8080
+          KC_BROWSER_SERVER_URL: http://localhost:8080
+          KC_REALM: rr-store
+          OIDC_RP_CLIENT_ID: test-client
+          OIDC_RP_CLIENT_SECRET: test-secret
+          KC_ADMIN_CLIENT_ID: test-admin-client
+          KC_ADMIN_CLIENT_SECRET: test-admin-secret
+
         run: uv run python manage.py test
