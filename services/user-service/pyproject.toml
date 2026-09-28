@@ -30,6 +30,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "coverage>=7.16.2",
     "ipdb>=0.13.13",
     "ruff>=0.16.5",
 ]
@@ -53,3 +54,15 @@ select = ["E", "F", "I"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.coverage.run]
+source = ["core_apps"]
+
+[tool.coverage.report]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/admin.py",
+    "*/apps.py",
+]
+fail_under = 60
