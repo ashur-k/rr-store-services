@@ -5,12 +5,48 @@ on:
   pull_request:
 
 jobs:
-  test:
+  backend-tests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: user-service
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U admin -d user-service"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Say hello
-        run: echo "CI pipeline is working!"
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.19"
+
+      - name: Install dependencies
+        working-directory: services/user-service
+        run: uv sync
+
+      - name: Run Django tests
+        working-directory: services/user-service
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: user-service
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: postgres
+        run: uv run python manage.py test
