@@ -1,7 +1,5 @@
-
 import type { ReactNode } from "react";
 import {
-  createContext,
   useCallback,
   useEffect,
   useRef,
@@ -9,18 +7,7 @@ import {
 } from "react";
 
 import keycloak from "./keycloak";
-
-interface AuthContextValue {
-  isAuthenticated: boolean;
-  loading: boolean;
-  login: () => Promise<void>;
-  register: () => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextValue | undefined>(
-  undefined
-);
+import { AuthContext } from "./AuthContext";
 
 interface AuthProviderProps {
   children: ReactNode;

@@ -59,3 +59,29 @@ jobs:
           KC_ADMIN_CLIENT_SECRET: test-admin-secret
 
         run: uv run python manage.py test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/web
+        run: npm ci
+
+      - name: Run lint
+        working-directory: frontend/web
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: frontend/web
+        run: npm run build

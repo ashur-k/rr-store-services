@@ -1,35 +1,44 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Alert, Button, Card, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
-import {updateUser, type UpdateUserData,} from "../features/users/api/updateUser.ts";
+import { updateUser, type UpdateUserData } from "../features/users/api/updateUser";
 
 export function EditProfilePage() {
+  const { data: user, isLoading, isError } = useCurrentUser();
+
+  if (isLoading) {
+    return <p>Loading profile...</p>;
+  }
+
+  if (isError || !user) {
+    return <p>Failed to load profile.</p>;
+  }
+
+  return <EditProfileForm user={user} />;
+}
+
+interface EditProfileFormProps {
+  user: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+}
+
+function EditProfileForm({ user }: EditProfileFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading, isError } = useCurrentUser();
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    setFirstName(user.first_name);
-    setLastName(user.last_name);
-    setEmail(user.email);
-  }, [user]);
+  const [firstName, setFirstName] = useState(user.first_name);
+  const [lastName, setLastName] = useState(user.last_name);
+  const [email, setEmail] = useState(user.email);
 
   const updateMutation = useMutation({
-    mutationFn: (data: UpdateUserData) =>
-      updateUser(user!.id, data),
+    mutationFn: (data: UpdateUserData) => updateUser(user.id, data),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -50,14 +59,6 @@ export function EditProfilePage() {
     });
   }
 
-  if (isLoading) {
-    return <p>Loading profile...</p>;
-  }
-
-  if (isError || !user) {
-    return <p>Failed to load profile.</p>;
-  }
-
   return (
     <Container className="py-5">
       <Card className="mx-auto" style={{ maxWidth: "500px" }}>
@@ -65,9 +66,7 @@ export function EditProfilePage() {
           <h1 className="mb-4">Edit Profile</h1>
 
           {updateMutation.isError && (
-            <Alert variant="danger">
-              Failed to update your profile.
-            </Alert>
+            <Alert variant="danger">Failed to update your profile.</Alert>
           )}
 
           <Form onSubmit={handleSubmit}>
@@ -107,9 +106,7 @@ export function EditProfilePage() {
                 variant="dark"
                 disabled={updateMutation.isPending}
               >
-                {updateMutation.isPending
-                  ? "Saving..."
-                  : "Save changes"}
+                {updateMutation.isPending ? "Saving..." : "Save changes"}
               </Button>
 
               <Button
@@ -127,4 +124,3 @@ export function EditProfilePage() {
     </Container>
   );
 }
-
