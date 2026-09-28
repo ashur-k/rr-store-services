@@ -6,6 +6,8 @@ import { HomePage } from "../pages/HomePage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { ManageUsersPage } from "../pages/ManageUsersPage";
 import { RoleProtectedRoute } from "../components/auth/RoleProtectedRoute";
+import { RegisterPage } from "../pages/RegisterPage";
+import { EditProfilePage } from "../pages/EditProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -15,6 +17,18 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "register",
+        element: <RegisterPage />,
+      },
+      {
+        path: "profile/edit",
+        element: (
+          <ProtectedRoute>
+            <EditProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",

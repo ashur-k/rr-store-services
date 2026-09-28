@@ -14,6 +14,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   loading: boolean;
   login: () => Promise<void>;
+  register: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -63,6 +64,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   }, []);
 
+  const register = useCallback(async () => {
+    await keycloak.register({
+      redirectUri: `${window.location.origin}/profile`,
+    });
+  }, []);
+
   const logout = useCallback(async () => {
     await keycloak.logout({
       redirectUri: window.location.origin,
@@ -75,6 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated,
         loading,
         login,
+        register,
         logout,
       }}
     >
