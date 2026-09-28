@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from config.container import Container
 
 from ..models import User
+from ..permissions import IsKeycloakAdminOrStaff, IsSelfOrAdminStaff
 from ..schemas import CreateUser, UpdateUser, UserResponse
 from ..services import UserService
 
@@ -22,6 +23,8 @@ def serialize_user(user: User) -> dict:
 
 class UserListCreateView(APIView):
     """List and create users."""
+
+    permission_classes = [IsKeycloakAdminOrStaff]
 
     @inject
     def get(self, request, user_service: UserService = Provide[Container.user_service]):
@@ -46,6 +49,12 @@ class UserListCreateView(APIView):
 
 class UserDetailView(APIView):
     """Retrieve, update, or delete a user."""
+
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsKeycloakAdminOrStaff()]
+
+        return [IsSelfOrAdminStaff()]
 
     @inject
     def get(
