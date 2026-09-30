@@ -9,7 +9,10 @@ from keycloak.exceptions import (
 )
 
 from config.keycloak import KEYCLOAK
-from core_apps.common.exceptions import KeycloakError
+from core_apps.common.exceptions import (
+    KeycloakError,
+    KeycloakUserNotFoundError,
+)
 
 from ..schemas import KeycloakUserCreate, KeycloakUserUpdate
 
@@ -84,6 +87,9 @@ class KeycloakClient:
 
         try:
             self._client.delete_user(user_id)
-        except (KeycloakAuthenticationError, KeycloakConnectionError, KeycloakDeleteError) as exc:
-            raise KeycloakError("Failed to delete user from Keycloak."
-) from exc
+        except KeycloakDeleteError as exc:
+            if exc.response_code == 404:
+                raise KeycloakUserNotFoundError(f"User {user_id} was not found in Keycloak.") from exc
+            raise KeycloakError("Failed to delete user from Keycloak.") from exc
+        except (KeycloakAuthenticationError, KeycloakConnectionError) as exc:
+            raise KeycloakError("Failed to delete user from Keycloak.") from exc

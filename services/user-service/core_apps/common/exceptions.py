@@ -14,3 +14,7 @@ class UserNotFoundError(ApplicationError):
 
 class KeycloakError(ApplicationError):
     """Raised when a Keycloak operation fails."""
+
+
+class KeycloakUserNotFoundError(KeycloakError):
+    pass

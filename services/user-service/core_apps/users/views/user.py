@@ -68,7 +68,7 @@ class UserDetailView(APIView):
         user_id: int,
         user_service: UserService = Provide[Container.user_service],
     ):
-        user = user_service.get_user(user_id)
+        user = user_service.get_user_by_id(user_id)
 
         return Response(
             serialize_user(user),

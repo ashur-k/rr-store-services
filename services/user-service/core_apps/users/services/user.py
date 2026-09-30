@@ -2,7 +2,7 @@ import logging
 
 from django.db import transaction
 
-from core_apps.common.exceptions import UserAlreadyExistsError
+from core_apps.common.exceptions import KeycloakUserNotFoundError, UserAlreadyExistsError
 
 from ..clients import KeycloakClient
 from ..models import User
@@ -38,9 +38,8 @@ class UserService:
 
         return self.user_selector.get_all()
 
-    def get_user(self, user_id: int) -> User:
+    def get_user_by_id(self, user_id: int) -> User:
             """Return a Django user."""
-    
             return self.user_selector.get_by_id(user_id)
 
     def create_user(self, data: CreateUser) -> User:
@@ -89,32 +88,25 @@ class UserService:
                 )
 
         keycloak_data = KeycloakUserUpdate(
-            email=data.email,
-            first_name=data.first_name,
-            last_name=data.last_name,
+            email=data.email, first_name=data.first_name, last_name=data.last_name
         )
 
         if keycloak_data.model_dump(exclude_none=True):
-            self.keycloak_client.update_user(
-                str(user.kc_id),
-                keycloak_data,
-            )
+            self.keycloak_client.update_user(str(user.kc_id), keycloak_data)
 
         if data.email is not None:
-            user = self.user_repository.update_email(
-                user,
-                data.email,
-            )
+            user = self.user_repository.update_email(user, data.email)
 
         return user
 
     def delete_user(self, user_id: int) -> None:
         """Delete a user from Keycloak and Django."""
 
-        user = self.user_selector.get_by_id(user_id)
+        user = self.user_selector.get_by_id(user_id)        
 
-        self.keycloak_client.delete_user(
-            str(user.kc_id),
-        )
+        try:
+            self.keycloak_client.delete_user(str(user.kc_id))
+        except KeycloakUserNotFoundError:
+            pass
 
         self.user_repository.delete(user)

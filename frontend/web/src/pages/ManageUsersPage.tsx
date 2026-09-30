@@ -19,14 +19,8 @@ async function getUsers(): Promise<ManagedUser[]> {
 export function ManageUsersPage() {
   const queryClient = useQueryClient();
 
-  const {
-    data: users,
-    isLoading,
-    isError,
-  } = useQuery<ManagedUser[]>({
-    queryKey: ["users"],
-    queryFn: getUsers,
-  });
+  const {data: users, isLoading, isError} = useQuery<ManagedUser[]>(
+    {queryKey: ["users"], queryFn: getUsers});
 
   const { data: currentUser } = useCurrentUser();
 
