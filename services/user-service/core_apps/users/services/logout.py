@@ -27,7 +27,7 @@ class KeycloakLogoutService:
         if id_token:
             params = {
                 "id_token_hint": id_token,
-                "post_logout_redirect_uri": request.build_absolute_uri("/"),
+                "post_logout_redirect_uri": request.build_absolute_uri("/admin/"),
             }
 
             logout_url += "?" + urlencode(params)

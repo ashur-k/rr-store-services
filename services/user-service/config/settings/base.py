@@ -200,7 +200,7 @@ OIDC_OP_LOGOUT_ENDPOINT = KEYCLOAK.logout_endpoint
 # )
 
 ALLOW_LOGOUT_GET_METHOD = True
-LOGOUT_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/admin/"
 
 OIDC_CREATE_USER = True
 OIDC_USERNAME_ALGO = None
@@ -232,7 +232,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
-    
+
 ]
 CORS_ALLOW_CREDENTIALS = True
 

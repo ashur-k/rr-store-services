@@ -28,7 +28,26 @@ services:
     tty: true
     networks:
       - rr-store
-    
+
+  store-service:
+    container_name: store-service
+    build:
+      context: ./services/store-service/
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/store-service:/app
+      - store_service_venv:/app/.venv
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uv run uvicorn main:app --host 0.0.0.0 --port 8000
+    stdin_open: true
+    tty: true
+    networks:
+      - rr-store
+
   frontend:
     container_name: frontend
     build:
@@ -44,7 +63,7 @@ services:
     command: npm run dev -- --host 0.0.0.0
     networks:
       - rr-store
-  
+
   postgres:
     container_name: postgres
     build:
@@ -62,7 +81,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  
+
   mailhog:
     container_name: mailhog
     image: mailhog/mailhog:v1.0.0
@@ -70,7 +89,7 @@ services:
       - "8025:8025"
     networks:
       - rr-store
-  
+
   nginx:
     container_name: nginx
     restart: always
@@ -88,7 +107,7 @@ services:
       - "8080:80"
     networks:
       - rr-store
-  
+
   keycloak:
     container_name: keycloak
     build:
@@ -111,8 +130,8 @@ networks:
 
 volumes:
   user_service_venv:
+  store_service_venv:
   static_volume:
   media_volume:
   frontend_dist:
   local_postgres_data: {}
-  
