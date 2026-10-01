@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
 import { updateUser, type UpdateUserData } from "../features/users/api/updateUser";
+import { useAuth } from "../features/auth/useAuth";
+import keycloak from "../features/auth/keycloak";
 
 export function EditProfilePage() {
   const { data: user, isLoading, isError } = useCurrentUser();
@@ -32,6 +34,7 @@ interface EditProfileFormProps {
 function EditProfileForm({ user }: EditProfileFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { refreshToken } = useAuth();
 
   const [firstName, setFirstName] = useState(user.first_name);
   const [lastName, setLastName] = useState(user.last_name);
@@ -41,13 +44,19 @@ function EditProfileForm({ user }: EditProfileFormProps) {
     mutationFn: (data: UpdateUserData) => updateUser(user.id, data),
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["currentUser"],
-      });
+    console.log("TOKEN BEFORE REFRESH:", keycloak.token);
 
-      navigate("/profile");
-    },
-  });
+    await refreshToken();
+
+    console.log("TOKEN AFTER REFRESH:", keycloak.token);
+
+    await queryClient.invalidateQueries({
+      queryKey: ["currentUser"],
+    });
+
+    navigate("/profile");
+  },
+});
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

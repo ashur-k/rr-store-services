@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 
 class UserProfileSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     sub = serializers.CharField()
     email = serializers.EmailField(allow_blank=True)
     username = serializers.CharField()

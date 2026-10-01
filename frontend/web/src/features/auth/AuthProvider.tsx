@@ -63,6 +63,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   }, []);
 
+  const refreshToken = useCallback(async () => {
+  await keycloak.updateToken(-1);
+}, []);
   return (
     <AuthContext.Provider
       value={{
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login,
         register,
         logout,
+        refreshToken,
       }}
     >
       {children}

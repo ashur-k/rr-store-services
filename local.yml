@@ -52,9 +52,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - local_postgres_data:/var/lib/postgresql
-      - local_postgres_data_backups:/backups
+      - ./infrastructure/local/postgres/backups:/backups
     env_file:
-      - ./services/user-service/.envs/local/.env-postgres
+    - ./infrastructure/local/postgres/.env
     networks:
       - rr-store
     healthcheck:
@@ -115,5 +115,4 @@ volumes:
   media_volume:
   frontend_dist:
   local_postgres_data: {}
-  local_postgres_data_backups: {}
   

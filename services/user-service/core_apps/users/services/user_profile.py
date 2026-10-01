@@ -14,6 +14,7 @@ class UserProfileService:
         )
 
         return {
+            "id": user.id,
             "sub": claims.get("sub", ""),
             "email": user.email,
             "username": user.username,
