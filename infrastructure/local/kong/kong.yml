@@ -1,0 +1,41 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: user-service
+    url: http://user-service:8000
+    connect_timeout: 5000
+    write_timeout: 5000
+    read_timeout: 5000
+    retries: 2
+
+    routes:
+      - name: user-service-route
+        paths:
+          - /api/users
+        strip_path: false
+
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+
+  - name: store-service
+    url: http://store-service:8000
+    connect_timeout: 5000
+    write_timeout: 5000
+    read_timeout: 5000
+    retries: 2
+
+    routes:
+      - name: store-service-route
+        paths:
+          - /api/stores
+        strip_path: false
+
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
