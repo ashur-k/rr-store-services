@@ -6,8 +6,8 @@ import {
   useState,
 } from "react";
 
-import keycloak from "./keycloak";
 import { AuthContext } from "./AuthContext";
+import keycloak from "./keycloak";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -32,8 +32,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         pkceMethod: "S256",
       })
       .then((authenticated) => {
-        console.log("Keycloak authenticated:", authenticated);
-
         setIsAuthenticated(authenticated);
         setLoading(false);
       })
@@ -64,8 +62,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const refreshToken = useCallback(async () => {
-  await keycloak.updateToken(-1);
-}, []);
+    await keycloak.updateToken(-1);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -81,4 +80,3 @@ export function AuthProvider({ children }: AuthProviderProps) {
     </AuthContext.Provider>
   );
 }
-

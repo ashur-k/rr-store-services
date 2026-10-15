@@ -1,4 +1,5 @@
 import api from "../../../services/api/axios";
+import type { UserResponse } from "../types";
 
 export interface RegisterUserData {
   first_name: string;
@@ -7,16 +8,11 @@ export interface RegisterUserData {
   password: string;
 }
 
-export interface RegisterUserResponse {
-  id: number;
-  kc_id: string;
-  email: string;
-}
 
 export async function registerUser(
   data: RegisterUserData,
-): Promise<RegisterUserResponse> {
-  const response = await api.post<RegisterUserResponse>("/users/", data);
+): Promise<UserResponse> {
+  const response = await api.post<UserResponse>("/users/", data);
 
   return response.data;
 }

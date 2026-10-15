@@ -1,12 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useState, type FormEvent } from "react";
 import { Alert, Button, Card, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
-import { updateUser, type UpdateUserData } from "../features/users/api/updateUser";
-import { useAuth } from "../features/auth/useAuth";
-import keycloak from "../features/auth/keycloak";
+import { useCurrentUser } from "../../features/auth/hooks/useCurrentUser";
+import { useUpdateUser } from "../../features/users/hooks/useUpdateUser";
 
 export function EditProfilePage() {
   const { data: user, isLoading, isError } = useCurrentUser();
@@ -33,49 +31,35 @@ interface EditProfileFormProps {
 
 function EditProfileForm({ user }: EditProfileFormProps) {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { refreshToken } = useAuth();
+  const updateMutation = useUpdateUser();
 
   const [firstName, setFirstName] = useState(user.first_name);
   const [lastName, setLastName] = useState(user.last_name);
   const [email, setEmail] = useState(user.email);
 
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdateUserData) => updateUser(user.id, data),
-
-    onSuccess: async () => {
-    console.log("TOKEN BEFORE REFRESH:", keycloak.token);
-
-    await refreshToken();
-
-    console.log("TOKEN AFTER REFRESH:", keycloak.token);
-
-    await queryClient.invalidateQueries({
-      queryKey: ["currentUser"],
-    });
-
-    navigate("/profile");
-  },
-});
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     updateMutation.mutate({
-      first_name: firstName,
-      last_name: lastName,
-      email,
+      userId: user.id,
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+      },
     });
   }
 
   return (
-    <Container className="py-5">
-      <Card className="mx-auto" style={{ maxWidth: "500px" }}>
+    <Container className="py-4">
+      <Card>
         <Card.Body>
-          <h1 className="mb-4">Edit Profile</h1>
+          <Card.Title>Edit Profile</Card.Title>
 
           {updateMutation.isError && (
-            <Alert variant="danger">Failed to update your profile.</Alert>
+            <Alert variant="danger">
+              Failed to update your profile. Please try again.
+            </Alert>
           )}
 
           <Form onSubmit={handleSubmit}>
@@ -109,24 +93,21 @@ function EditProfileForm({ user }: EditProfileFormProps) {
               />
             </Form.Group>
 
-            <div className="d-flex gap-2">
-              <Button
-                type="submit"
-                variant="dark"
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? "Saving..." : "Save changes"}
-              </Button>
+            <Button
+              type="submit"
+              disabled={updateMutation.isPending}
+              className="me-2"
+            >
+              {updateMutation.isPending ? "Saving..." : "Save changes"}
+            </Button>
 
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate("/profile")}
-                disabled={updateMutation.isPending}
-              >
-                Cancel
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/profile")}
+            >
+              Cancel
+            </Button>
           </Form>
         </Card.Body>
       </Card>

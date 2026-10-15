@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
+import { useCurrentUser } from "../../features/auth/hooks/useCurrentUser";
 
 export function ProfilePage() {
   const {data: user, isLoading, isError} = useCurrentUser();
@@ -8,10 +8,6 @@ export function ProfilePage() {
   if (isLoading) {return <p>Loading profile...</p>;}
 
   if (isError || !user) {return <p>Failed to load profile.</p>;}
-
-  const canManageUsers =
-    user.realm_roles.includes("admin") ||
-    user.realm_roles.includes("staff");
 
   return (
     <main>
@@ -30,16 +26,6 @@ export function ProfilePage() {
           Edit Profile
         </Link>
       </section>
-
-      {canManageUsers && (
-        <section>
-          <h2>User Management</h2>
-
-          <Link to="/profile/users">
-            Manage Users
-          </Link>
-        </section>
-      )}
     </main>
   );
 }

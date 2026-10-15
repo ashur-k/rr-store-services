@@ -1,14 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Button, Card, Container, Form } from "react-bootstrap";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
-import { registerUser } from "../features/auth/api/registerUser";
-import { useAuth } from "../features/auth/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useRegisterUser } from "../../features/users/hooks/useRegisterUser";
+
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+ 
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -17,12 +16,7 @@ export function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const registerMutation = useMutation({
-    mutationFn: registerUser,
-    onSuccess: async () => {
-      await login();
-    },
-  });
+  const registerMutation = useRegisterUser();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
