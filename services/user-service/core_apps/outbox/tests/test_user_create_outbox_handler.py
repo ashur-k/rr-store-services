@@ -15,6 +15,8 @@ class UserCreatedOutboxHandlerTests(TestCase):
             kc_id=uuid4(),
             email="storeowner-test@example.com",
             roles=["store_owner"],
+            store_name="Test Store",
+            store_slug="test-store",
         )
 
         handler = UserCreatedOutboxHandler()

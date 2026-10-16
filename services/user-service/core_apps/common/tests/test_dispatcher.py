@@ -21,6 +21,8 @@ class EventDispatcherTests(SimpleTestCase):
             kc_id="896bc424-c3f6-4e6c-bdb7-c3364d4bf443",
             email="storeowner-test@example.com",
             roles=["store_owner"],
+            store_name="Test Store",
+            store_slug="test-store",
         )
 
         dispatcher.register(UserCreated, handler)
