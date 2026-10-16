@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
+import { useToast } from "../../../components/feedback/useToast";
+import { getApiErrorMessage } from "../../../services/api/getApiErrorMessage";
 import { queryKeys } from "../../../services/api/queryKeys";
 import { useAuth } from "../../auth/useAuth";
 import { updateUser, type UpdateUserData } from "../api/updateUser";
@@ -12,6 +14,7 @@ interface UpdateUserVariables {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const { refreshToken } = useAuth();
 
@@ -24,6 +27,10 @@ export function useUpdateUser() {
         queryKey: queryKeys.currentUser,
       });
       navigate("/profile");
+      showToast("success", "User profile updated successfully.");
+    },
+    onError: (error) => {
+      showToast("error", getApiErrorMessage(error));
     },
   });
 }

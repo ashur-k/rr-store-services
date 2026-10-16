@@ -1,18 +1,12 @@
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, SubmitEvent } from "react";
 import { useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
-import Alert from "react-bootstrap/Alert";
 import { useNavigate } from "react-router-dom";
 
-import { createStoreUser } from "../../features/users/api/createStoreUser";
+import type { CreateStoreUserData } from "../../features/users/api/createStoreUser";
+import { useCreateStoreUser } from "../../features/users/hooks/useCreateStoreUser";
 
-interface CreateStoreUserFormData {
-  first_name: string;
-  last_name: string;
-  email: string;
-}
-
-const initialFormData: CreateStoreUserFormData = {
+const initialFormData: CreateStoreUserData = {
   first_name: "",
   last_name: "",
   email: "",
@@ -20,11 +14,10 @@ const initialFormData: CreateStoreUserFormData = {
 
 export function CreateStoreUserPage() {
   const navigate = useNavigate();
+  const createMutation = useCreateStoreUser();
 
   const [formData, setFormData] =
-    useState<CreateStoreUserFormData>(initialFormData);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    useState<CreateStoreUserData>(initialFormData);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -35,22 +28,16 @@ export function CreateStoreUserPage() {
     }));
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      await createStoreUser(formData);
-      navigate("/store", { state: { activeTab: "manage-store-users" } });
-    } catch {
-      setErrorMessage(
-        "Failed to create the store user. Please check the details and try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    createMutation.mutate(formData, {
+      onSuccess: () => {
+        navigate("/store", {
+          state: { activeTab: "manage-store-users" },
+        });
+      },
+    });
   }
 
   return (
@@ -63,12 +50,6 @@ export function CreateStoreUserPage() {
       <Card className="border-0 shadow-sm">
         <Card.Body className="p-4">
           <Form onSubmit={handleSubmit}>
-            {errorMessage && (
-              <Alert variant="danger" role="alert">
-                {errorMessage}
-              </Alert>
-            )}
-
             <h2 className="h5 mb-3">User details</h2>
 
             <Row>
@@ -119,8 +100,10 @@ export function CreateStoreUserPage() {
                 Cancel
               </Button>
 
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating User..." : "Create Store User"}
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending
+                  ? "Creating User..."
+                  : "Create Store User"}
               </Button>
             </div>
           </Form>

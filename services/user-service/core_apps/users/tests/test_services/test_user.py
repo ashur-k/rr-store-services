@@ -5,7 +5,6 @@ from uuid import uuid4
 from django.test import TestCase
 
 from config.container import Container
-from core_apps.common.events import EventDispatcher
 from core_apps.common.exceptions import (
     KeycloakUserNotFoundError,
     UserAlreadyExistsError,

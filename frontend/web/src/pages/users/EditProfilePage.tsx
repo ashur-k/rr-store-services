@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from "react";
+import type { SubmitEvent } from "react";
+import { useState } from "react";
 import { Alert, Button, Card, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
@@ -36,7 +37,7 @@ function EditProfileForm({ user }: EditProfileFormProps) {
   const [lastName, setLastName] = useState(user.last_name);
   const [email, setEmail] = useState(user.email);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     updateMutation.mutate({

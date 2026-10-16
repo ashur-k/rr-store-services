@@ -1,10 +1,9 @@
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
-import Alert from "react-bootstrap/Alert";
 import { useNavigate } from "react-router-dom";
 
-import { createStore } from "../../features/store/api/createStore";
+import { useCreateStore } from "../../features/store/hooks/useCreateStore";
 import { useStoreUsers } from "../../features/users/hooks/useStoreUsers";
 
 interface CreateStoreFormData {
@@ -24,11 +23,12 @@ const initialFormData: CreateStoreFormData = {
 export function CreateStorePage() {
   const navigate = useNavigate();
   const { data: users = [], isLoading, isError } = useStoreUsers();
+  const createMutation = useCreateStore();
 
   const [formData, setFormData] =
     useState<CreateStoreFormData>(initialFormData);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [showOwnerResults, setShowOwnerResults] = useState(false);
 
   function handleChange(
     event: ChangeEvent<
@@ -43,25 +43,15 @@ export function CreateStorePage() {
     }));
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
 
-    try {
-      await createStore(formData);
-      navigate("/store");
-    } catch {
-      setErrorMessage(
-        "Failed to create the store. Please check the details and try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    createMutation.mutate(formData, {
+      onSuccess: () => {
+        navigate("/store");
+      },
+    });
   }
-
-  const [ownerSearch, setOwnerSearch] = useState("");
-  const [showOwnerResults, setShowOwnerResults] = useState(false);
 
   const filteredUsers = users.filter((user) =>
     user.email?.toLowerCase().includes(ownerSearch.toLowerCase()),
@@ -78,12 +68,10 @@ export function CreateStorePage() {
                 Create a store and assign its owner.
               </p>
 
-              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-
               {isError && (
-                <Alert variant="danger">
-                  Failed to load users. Please try again.
-                </Alert>
+                <p className="text-danger" role="alert">
+                  Failed to load store owners. Please try again.
+                </p>
               )}
 
               <Form onSubmit={handleSubmit}>
@@ -136,7 +124,6 @@ export function CreateStorePage() {
                       setOwnerSearch(event.target.value);
                       setShowOwnerResults(true);
 
-                      // Clear the previous selection when searching again.
                       setFormData((previous) => ({
                         ...previous,
                         owner_id: "",
@@ -188,16 +175,16 @@ export function CreateStorePage() {
                     type="button"
                     variant="outline-secondary"
                     onClick={() => navigate("/store")}
-                    disabled={isSubmitting}
+                    disabled={createMutation.isPending}
                   >
                     Cancel
                   </Button>
 
                   <Button
                     type="submit"
-                    disabled={isSubmitting || isLoading || isError}
+                    disabled={createMutation.isPending || isLoading || isError}
                   >
-                    {isSubmitting ? "Creating..." : "Create Store"}
+                    {createMutation.isPending ? "Creating..." : "Create Store"}
                   </Button>
                 </div>
               </Form>
