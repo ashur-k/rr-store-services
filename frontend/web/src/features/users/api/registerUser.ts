@@ -8,7 +8,6 @@ export interface RegisterUserData {
   password: string;
 }
 
-
 export async function registerUser(
   data: RegisterUserData,
 ): Promise<UserResponse> {

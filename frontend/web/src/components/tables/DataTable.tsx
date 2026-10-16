@@ -1,4 +1,3 @@
-
 import type { ReactNode } from "react";
 import { Table } from "react-bootstrap";
 
@@ -17,7 +16,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
 }
 
-export function DataTable<T,>({
+export function DataTable<T>({
   data,
   columns,
   getRowKey,
@@ -31,9 +30,7 @@ export function DataTable<T,>({
 
   if (hasError) {
     return (
-      <p className="text-danger">
-        Failed to load data. Please try again.
-      </p>
+      <p className="text-danger">Failed to load data. Please try again.</p>
     );
   }
 

@@ -1,26 +1,19 @@
-import { DataTable } from "../../components/tables/DataTable";
 import type { DataTableColumn } from "../../components/tables/DataTable";
+import { DataTable } from "../../components/tables/DataTable";
 
-import { useUsers } from "../../features/users/hooks/useUsers";
+import { useStoreUsers } from "../../features/users/hooks/useStoreUsers";
 import type { ManagedUser } from "../../features/users/types";
 
-
+import Button from "../../components/buttons//Button";
 import { useCurrentUser } from "../../features/auth/hooks/useCurrentUser";
 import { useDeleteUser } from "../../features/users/hooks/useDeleteUser";
-import Button from "../../components/buttons//Button";
-
 
 export function ManageUsersPage() {
-
-  const {
-    data: users = [],
-    isLoading,
-    isError,
-  } = useUsers();
+  const { data: users = [], isLoading, isError } = useStoreUsers();
 
   const { data: currentUser } = useCurrentUser();
 
-const deleteMutation = useDeleteUser();
+  const deleteMutation = useDeleteUser();
 
   function handleDelete(user: ManagedUser) {
     const confirmed = window.confirm(
@@ -53,8 +46,7 @@ const deleteMutation = useDeleteUser();
       header: "Actions",
       render: (user: ManagedUser) => {
         const isCurrentUser =
-          currentUser?.email?.toLowerCase() ===
-          user.email.toLowerCase();
+          currentUser?.email?.toLowerCase() === user.email.toLowerCase();
 
         if (isCurrentUser) {
           return <span>Current user</span>;
@@ -67,17 +59,16 @@ const deleteMutation = useDeleteUser();
             className="btn-sm"
             onClick={() => handleDelete(user)}
             disabled={deleteMutation.isPending}
-          >{deleteMutation.isPending ? "Deleting..." : "Delete"}
-        </Button>
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+          </Button>
         );
       },
     },
   ];
 
   return (
-    <main>
-      <h1>Manage Users</h1>
-
+    <>
       <DataTable
         data={users}
         columns={columns}
@@ -88,10 +79,8 @@ const deleteMutation = useDeleteUser();
       />
 
       {deleteMutation.isError && (
-        <p className="text-danger mt-2">
-          Failed to delete user.
-        </p>
+        <p className="text-danger mt-2">Failed to delete user.</p>
       )}
-    </main>
+    </>
   );
 }

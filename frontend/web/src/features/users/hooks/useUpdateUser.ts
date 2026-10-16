@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
+import { queryKeys } from "../../../services/api/queryKeys";
 import { useAuth } from "../../auth/useAuth";
 import { updateUser, type UpdateUserData } from "../api/updateUser";
-import { queryKeys } from "../../../services/api/queryKeys";
 
 interface UpdateUserVariables {
   userId: string;

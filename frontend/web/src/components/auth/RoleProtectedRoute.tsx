@@ -15,10 +15,7 @@ export function RoleProtectedRoute({
 }: RoleProtectedRouteProps) {
   const { isAuthenticated, loading: authLoading } = useAuth();
 
-  const {
-    data: user,
-    isLoading: userLoading,
-  } = useCurrentUser();
+  const { data: user, isLoading: userLoading } = useCurrentUser();
 
   if (authLoading || userLoading) {
     return <p>Loading...</p>;
@@ -29,7 +26,7 @@ export function RoleProtectedRoute({
   }
 
   const hasRequiredRole = roles.some((role) =>
-    user?.realm_roles.includes(role)
+    user?.realm_roles.includes(role),
   );
 
   if (!hasRequiredRole) {

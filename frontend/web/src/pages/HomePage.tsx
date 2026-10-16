@@ -10,7 +10,6 @@ export function HomePage() {
   const [status, setStatus] = useState("Checking...");
   const { data: stores, isLoading, error } = useMyStores();
 
-
   useEffect(() => {
     if (loading || !isAuthenticated) {
       return;
@@ -31,9 +30,7 @@ export function HomePage() {
       <h1>Welcome to RR Store</h1>
       <p>Store service: {status}</p>
 
-      <p>
-        My stores: {isLoading ? "Loading..." : stores?.length ?? 0}
-      </p>
+      <p>My stores: {isLoading ? "Loading..." : (stores?.length ?? 0)}</p>
 
       {error && <p>Failed to load stores</p>}
     </main>

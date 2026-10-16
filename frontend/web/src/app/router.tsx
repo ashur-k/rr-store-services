@@ -1,15 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import MainLayout from "../components/layout/MainLayout";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
-import { HomePage } from "../pages/HomePage";
-import { ProfilePage } from "../pages/users/ProfilePage";
-import { ManageUsersPage } from "../pages/users/ManageUsersPage";
 import { RoleProtectedRoute } from "../components/auth/RoleProtectedRoute";
-import { RegisterPage } from "../pages/users/RegisterPage";
-import { EditProfilePage } from "../pages/users/EditProfilePage";
-import { StorePage } from "../pages/store/StorePage";
+import MainLayout from "../components/layout/MainLayout";
+import { HomePage } from "../pages/HomePage";
 import { CreateStorePage } from "../pages/store/CreateStorePage";
+import { StorePage } from "../pages/store/StorePage";
+import { CreateStoreUserPage } from "../pages/users/CreateStoreUserPage";
+import { EditProfilePage } from "../pages/users/EditProfilePage";
+import { ManageUsersPage } from "../pages/users/ManageUsersPage";
+import { ProfilePage } from "../pages/users/ProfilePage";
+import { RegisterPage } from "../pages/users/RegisterPage";
 
 export const router = createBrowserRouter([
   {
@@ -51,9 +52,9 @@ export const router = createBrowserRouter([
       {
         path: "store",
         element: (
-          <ProtectedRoute>
+          <RoleProtectedRoute roles={["admin"]}>
             <StorePage />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         ),
       },
       {
@@ -61,6 +62,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute roles={["admin", "staff"]}>
             <CreateStorePage />
+          </RoleProtectedRoute>
+        ),
+      },
+      {
+        path: "store/users/create",
+        element: (
+          <RoleProtectedRoute roles={["admin"]}>
+            <CreateStoreUserPage />
           </RoleProtectedRoute>
         ),
       },

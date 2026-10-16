@@ -1,6 +1,5 @@
 import api from "../../../services/api/axios";
 
-
 export interface CurrentUser {
   id: string;
   sub: string;
@@ -17,4 +16,3 @@ export const getCurrentUser = async (): Promise<CurrentUser> => {
   const response = await api.get("/users/me/");
   return response.data;
 };
-

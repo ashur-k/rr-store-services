@@ -1,10 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AuthContext } from "./AuthContext";
 import keycloak from "./keycloak";

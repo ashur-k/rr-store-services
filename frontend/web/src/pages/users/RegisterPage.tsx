@@ -4,10 +4,8 @@ import { Button, Card, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useRegisterUser } from "../../features/users/hooks/useRegisterUser";
 
-
 export function RegisterPage() {
   const navigate = useNavigate();
- 
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -88,16 +86,12 @@ export function RegisterPage() {
               <Form.Control
                 type="password"
                 value={confirmPassword}
-                onChange={(event) =>
-                  setConfirmPassword(event.target.value)
-                }
+                onChange={(event) => setConfirmPassword(event.target.value)}
                 required
               />
             </Form.Group>
 
-            {passwordError && (
-              <p className="text-danger">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-danger">{passwordError}</p>}
 
             {registerMutation.isError && (
               <p className="text-danger">

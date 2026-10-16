@@ -3,11 +3,15 @@ import { Link } from "react-router-dom";
 import { useCurrentUser } from "../../features/auth/hooks/useCurrentUser";
 
 export function ProfilePage() {
-  const {data: user, isLoading, isError} = useCurrentUser();
+  const { data: user, isLoading, isError } = useCurrentUser();
 
-  if (isLoading) {return <p>Loading profile...</p>;}
+  if (isLoading) {
+    return <p>Loading profile...</p>;
+  }
 
-  if (isError || !user) {return <p>Failed to load profile.</p>;}
+  if (isError || !user) {
+    return <p>Failed to load profile.</p>;
+  }
 
   return (
     <main>
@@ -22,9 +26,7 @@ export function ProfilePage() {
       <section>
         <h2>Account</h2>
 
-        <Link to="/profile/edit">
-          Edit Profile
-        </Link>
+        <Link to="/profile/edit">Edit Profile</Link>
       </section>
     </main>
   );
