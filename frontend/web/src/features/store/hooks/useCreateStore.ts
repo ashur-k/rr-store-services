@@ -16,7 +16,7 @@ export function useCreateStore() {
       showToast("success", "Store created successfully.");
 
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.stores,
+        queryKey: queryKeys.myStores,
       });
     },
 
