@@ -1,12 +1,17 @@
 import logging
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+from uuid import uuid4
 
 from django.test import TestCase
 
+from config.container import Container
+from core_apps.common.events import EventDispatcher
 from core_apps.common.exceptions import (
     KeycloakUserNotFoundError,
     UserAlreadyExistsError,
 )
+from core_apps.outbox.models import OutboxEvent
+from core_apps.users.schemas import CreateStoreOwner
 
 from ...repositories import ProfileRepository, UserRepository
 from ...schemas import CreateUser, KeycloakUserCreate, KeycloakUserUpdate, UpdateUser
@@ -15,7 +20,6 @@ from ...services import UserService
 
 
 class UserServiceTestCase(TestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -31,12 +35,16 @@ class UserServiceTestCase(TestCase):
         self.user_selector = Mock(spec=UserSelector)
         self.user_repository = Mock(spec=UserRepository)
         self.profile_repository = Mock(spec=ProfileRepository)
+        container = Container()
+
+        self.event_dispatcher = container.event_dispatcher()
 
         self.service = UserService(
             keycloak_client=self.keycloak_client,
             user_selector=self.user_selector,
             user_repository=self.user_repository,
             profile_repository=self.profile_repository,
+            event_dispatcher=self.event_dispatcher,
         )
 
         self.email = "test@example.com"
@@ -55,9 +63,9 @@ class UserServiceTestCase(TestCase):
 
     def test_create_user_raises_error_when_email_already_exists(self):
         data = CreateUser(email=self.email, first_name=self.fn, last_name=self.ln, password=self.pwd)
-        
+
         self.user_selector.exists_by_email.return_value = True
-        
+
         with self.assertRaises(UserAlreadyExistsError):
             self.service.create_user(data)
 
@@ -74,7 +82,7 @@ class UserServiceTestCase(TestCase):
             self.service.create_user(data)
 
         self.keycloak_client.delete_user.assert_called_once_with(kc_id)
-    
+
     def test_create_user_calls_keycloak(self):
         data = CreateUser(email=self.email, first_name=self.fn, last_name=self.ln, password=self.pwd)
 
@@ -137,9 +145,7 @@ class UserServiceTestCase(TestCase):
 
         self.keycloak_client.update_user.assert_called_once_with(
             "kc-id",
-            KeycloakUserUpdate(
-                email="new@example.com", first_name=None, last_name=None
-            ),
+            KeycloakUserUpdate(email="new@example.com", first_name=None, last_name=None),
         )
 
     def test_delete_user_deletes_local_user_when_keycloak_user_not_found(self):
@@ -166,3 +172,62 @@ class UserServiceTestCase(TestCase):
 
         self.user_selector.get_by_id.assert_called_once_with(user_id)
         self.keycloak_client.delete_user.assert_called_once_with("kc-id")
+
+    def test_create_store_owner_creates_outbox_event(self):
+        data = CreateStoreOwner(
+            email=self.email,
+            first_name=self.fn,
+            last_name=self.ln,
+        )
+
+        kc_id = uuid4()
+        user = Mock()
+        user.id = 3
+        user.kc_id = kc_id
+        user.email = self.email
+
+        self.user_selector.exists_by_email.return_value = False
+        self.keycloak_client.create_store_owner.return_value = kc_id
+        self.user_repository.create.return_value = user
+
+        self.service.create_store_owner(data)
+
+        outbox_event = OutboxEvent.objects.get(event_type="UserCreated")
+
+        self.assertEqual(outbox_event.event_type, "UserCreated")
+        self.assertEqual(outbox_event.payload["user_id"], user.id)
+        self.assertEqual(outbox_event.payload["kc_id"], str(user.kc_id))
+        self.assertEqual(outbox_event.payload["email"], user.email)
+        self.assertEqual(outbox_event.payload["roles"], ["store_owner"])
+
+    def test_create_store_owner_rolls_back_when_outbox_creation_fails(self):
+        data = CreateStoreOwner(
+            email=self.email,
+            first_name=self.fn,
+            last_name=self.ln,
+        )
+
+        kc_id = uuid4()
+        user = Mock()
+        user.id = 3
+        user.kc_id = kc_id
+        user.email = self.email
+
+        self.user_selector.exists_by_email.return_value = False
+        self.keycloak_client.create_store_owner.return_value = kc_id
+        self.user_repository.create.return_value = user
+
+        with patch(
+            "core_apps.outbox.models.OutboxEvent.objects.create",
+            side_effect=Exception("Outbox failure"),
+        ):
+            with self.assertRaises(Exception):
+                self.service.create_store_owner(data)
+
+        self.assertFalse(
+            OutboxEvent.objects.filter(
+                event_type="UserCreated",
+            ).exists()
+        )
+
+        self.keycloak_client.delete_user.assert_called_once_with(kc_id)

@@ -17,9 +17,14 @@ class UserSelector:
         try:
             return User.objects.get(id=user_id)
         except User.DoesNotExist as exc:
-            raise UserNotFoundError(
-                f"User with id '{user_id}' does not exist."
-            ) from exc
+            raise UserNotFoundError(f"User with id '{user_id}' does not exist.") from exc
+
+    def get_by_kc_ids(self, kc_ids: list[str]) -> dict[str, User]:
+        """Return local users indexed by their Keycloak IDs."""
+
+        users = User.objects.filter(kc_id__in=kc_ids)
+
+        return {str(user.kc_id): user for user in users}
 
     @staticmethod
     def get_by_kc_id(kc_id: UUID) -> User:

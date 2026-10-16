@@ -3,6 +3,7 @@ from .health import HealthView
 from .item_list import ItemListView
 from .logout import OIDCBackchannelLogoutView
 from .protected_report import protected_report
+from .store_owner import StoreUserDetailView, StoreUserListCreateView
 from .user import UserDetailView, UserListCreateView
 from .user_profile import UserProfileView
 
@@ -15,4 +16,6 @@ __all__ = [
     "protected_report",
     "UserProfileView",
     "UserDetailView",
+    "StoreUserListCreateView",
+    "StoreUserDetailView",
 ]

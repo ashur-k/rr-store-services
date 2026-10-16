@@ -17,6 +17,13 @@ class Store(Base):
         default=uuid4,
     )
 
+    slug: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+
     owner_id: Mapped[UUID] = mapped_column(
         PostgreSQLUUID(as_uuid=True),
         nullable=False,

@@ -212,6 +212,43 @@ wheels = [
 ]
 
 [[package]]
+name = "dependency-injector"
+version = "4.49.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/84/5e05c2997a196155b86446d48b9e5b2a055087c574746389fdc3c530f5b5/dependency_injector-4.49.1.tar.gz", hash = "sha256:b4614fa3731ffec00a381aebc1d17317b0a3a407aa679f164a3ea03c347de691", size = 1171204, upload-time = "2026-06-18T17:51:48.221Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/1e/9f3abdf0ac42cac1c319b210aa060669ea9d29f06caf00c27fe72fa5335c/dependency_injector-4.49.1-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:b1b71d6f500c001230a53e5bee01ea01c6d3bb2089f64ecc841b42672924a19a", size = 1771519, upload-time = "2026-06-18T17:50:58.476Z" },
+    { url = "https://files.pythonhosted.org/packages/68/20/fc1812f20ec75af2d4b5e391e93f15621af3102da46142e26177eb506b32/dependency_injector-4.49.1-cp310-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:10e481880b307a6a438c1cc7b0a1fa8754247239ef5a2e8fe82bd8a1e76e7682", size = 1854593, upload-time = "2026-06-18T17:51:02.069Z" },
+    { url = "https://files.pythonhosted.org/packages/32/ab/b1e1826aacc37d07ba0101230de7b5cbbb5ac6364b78ca3957f0a90d6a51/dependency_injector-4.49.1-cp310-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e05da5bc73a3e026f962a223672002934c0f415064b6e2c3db0b255e46c7b521", size = 1767354, upload-time = "2026-06-18T17:51:03.715Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/ab/1d873876e9adb612f8fba1e801820bf5a69cd7d864e01dca81651edd40f6/dependency_injector-4.49.1-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:5760390d295af0b605aacd02bb8ac2e9fe206f9c4fbe7770d0843a6cbfb9c2cd", size = 1748758, upload-time = "2026-06-18T17:51:05.287Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/ef/d715f4cd2e947fddc4c8763be1c4099793caf38aa1a099b6d621ecfeb768/dependency_injector-4.49.1-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:ba7e94e4323219c93dac35aabba7efa4e91c9afeac044b1d50bdc66a00a07238", size = 1845636, upload-time = "2026-06-18T17:51:07.023Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/32/03d1e5e0c6b79eaabf2ed4155302df05832e54789cc9f670cc62af20897b/dependency_injector-4.49.1-cp310-abi3-win32.whl", hash = "sha256:5a6e3a0df8cff636da3d7212473e30dff897c5bdbca2dd3049b5363012a495fa", size = 1548655, upload-time = "2026-06-18T17:51:08.721Z" },
+    { url = "https://files.pythonhosted.org/packages/93/51/ce3ca96314f93f44358523cb8cdf81c8c1e002b4e097141e460bc598c87f/dependency_injector-4.49.1-cp310-abi3-win_amd64.whl", hash = "sha256:153f6b8d1db35d1fc9b001e41564a47ab2a7708038fecefadf3afada8ec7f814", size = 1676934, upload-time = "2026-06-18T17:51:10.465Z" },
+]
+
+[[package]]
+name = "dnspython"
+version = "2.8.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8c/8b/57666417c0f90f08bcafa776861060426765fdb422eb10212086fb811d26/dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f", size = 368251, upload-time = "2025-09-07T18:58:00.022Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/5a/18ad964b0086c6e62e2e7500f7edc89e3faa45033c71c1893d34eed2b2de/dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af", size = 331094, upload-time = "2025-09-07T18:57:58.071Z" },
+]
+
+[[package]]
+name = "email-validator"
+version = "2.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dnspython" },
+    { name = "idna" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/22/900cb125c76b7aaa450ce02fd727f452243f2e91a61af068b40adba60ea9/email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426", size = 51238, upload-time = "2025-08-26T13:09:06.831Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/de/15/545e2b6cf2e3be84bc1ed85613edd75b8aea69807a71c26f4ca6a9258e82/email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4", size = 35604, upload-time = "2025-08-26T13:09:05.858Z" },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.142.2"
 source = { registry = "https://pypi.org/simple" }
@@ -395,6 +432,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1f/dc/e12c1fe1ed8a7b7149777127b1a0e12ce5bd5a81d97408bedc2128c260f5/opentelemetry_api-1.45.0.tar.gz", hash = "sha256:711ede81773c8025c2c03dac0450bc89f3d30aea6eabcc815c570d4e35a963f7", size = 72115, upload-time = "2026-09-25T12:32:28.399Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/44/b9/040d1a1c7836922828e6480cd2366bb8fe0ebf75b413d2bb51a9b0e7f78f/opentelemetry_api-1.45.0-py3-none-any.whl", hash = "sha256:80e068aba7cd56c8b58512d6a36f8d25cb1dfaa0c0a4cc1c938ccf9f362d9cb3", size = 60020, upload-time = "2026-09-25T12:32:03.192Z" },
+]
+
+[[package]]
+name = "pika"
+version = "1.4.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7f/26/54e0b98a7f60b474cb0a6c05ecf048d4bc8c866e10ab1c82bc83865e7421/pika-1.4.4.tar.gz", hash = "sha256:8cfc8b33a5cb16e733bd60cffca9732c0d1d761ecd80a89f34ed7df2cd38d6d6", size = 154713, upload-time = "2026-08-06T21:33:39.836Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/f3/921170b78779ac3f8b405cb28fce88acca1562ac114072cbf0a115e19bb9/pika-1.4.4-py3-none-any.whl", hash = "sha256:48de960c97a93b55db06b8be4c53eb977c9c8a2754c57cdae9097abcbd70ce04", size = 165275, upload-time = "2026-08-06T21:33:38.449Z" },
 ]
 
 [[package]]
@@ -597,8 +643,11 @@ dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
     { name = "cryptography" },
+    { name = "dependency-injector" },
+    { name = "email-validator" },
     { name = "fastapi" },
     { name = "httpx" },
+    { name = "pika" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "sqlalchemy", extra = ["asyncio"] },
@@ -610,8 +659,11 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.20.0" },
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "cryptography", specifier = ">=50.0.2" },
+    { name = "dependency-injector", specifier = ">=4.49.1" },
+    { name = "email-validator", specifier = ">=2.3.0" },
     { name = "fastapi", specifier = ">=0.142.2" },
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pika", specifier = ">=1.4.4" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pyjwt", specifier = ">=2.15.1" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.1.1" },

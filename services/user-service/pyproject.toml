@@ -19,6 +19,7 @@ dependencies = [
     "email-validator>=2.3.0",
     "mozilla-django-oidc>=5.0.2",
     "phonenumbers>=9.0.38",
+    "pika>=1.4.4",
     "pillow>=12.3.0",
     "psycopg[binary]>=3.3.5",
     "pydantic>=2.13.5",

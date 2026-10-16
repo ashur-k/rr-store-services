@@ -16,6 +16,7 @@ export function ManageUsersPage() {
   const deleteMutation = useDeleteUser();
 
   function handleDelete(user: ManagedUser) {
+    console.log(user);
     const confirmed = window.confirm(
       `Are you sure you want to delete ${user.email}?`,
     );
@@ -78,9 +79,7 @@ export function ManageUsersPage() {
         emptyMessage="No users found."
       />
 
-      {deleteMutation.isError && (
-        <p className="text-danger mt-2">Failed to delete user.</p>
-      )}
+      {deleteMutation.isError}
     </>
   );
 }

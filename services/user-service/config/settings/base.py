@@ -7,6 +7,15 @@ from config.keycloak import KEYCLOAK
 env = environ.Env()
 env.read_env()
 
+STORE_SERVICE_M2M_CLIENT_ID = env(
+    "STORE_SERVICE_M2M_CLIENT_ID",
+    default="user-service-store-check",
+)
+STORE_SERVICE_M2M_CLIENT_SECRET = env(
+    "STORE_SERVICE_M2M_CLIENT_SECRET",
+    default="",
+)
+
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 APP_DIR = ROOT_DIR / "core_apps"
@@ -44,9 +53,10 @@ LOCAL_APPS = [
     "core_apps.common.apps.CommonConfig",
     "core_apps.profiles.apps.ProfilesConfig",
     "core_apps.users.apps.UsersConfig",
+    "core_apps.outbox.apps.OutboxConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS +  LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -65,7 +75,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [ROOT_DIR / "templates",],
+        "DIRS": [
+            ROOT_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -138,10 +150,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(name)-12s %(asctime)s %(module)s "
-            "%(process)d %(thread)d %(message)s"
-        }
+        "verbose": {"format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"}
     },
     "handlers": {
         "console": {
@@ -211,7 +220,6 @@ LOGIN_URL = "/oidc/authenticate/"
 LOGIN_REDIRECT_URL = "/admin/"
 
 
-
 # --- Django REST Framework ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -223,19 +231,15 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
-    "EXCEPTION_HANDLER": (
-        "core_apps.common.exceptions_handlers.handle_application_exception"
-    ),
+    "EXCEPTION_HANDLER": ("core_apps.common.exceptions_handlers.handle_application_exception"),
 }
 
 # --- CORS ---
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
-
 ]
 CORS_ALLOW_CREDENTIALS = True
-
 
 
 SWAGGER_SETTINGS = {
@@ -248,3 +252,20 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+RABBITMQ = {
+    "HOST": env("RABBITMQ_HOST"),
+    "PORT": env.int("RABBITMQ_PORT"),
+    "USERNAME": env("RABBITMQ_USERNAME"),
+    "PASSWORD": env("RABBITMQ_PASSWORD"),
+    "VHOST": env("RABBITMQ_VHOST", default="/"),
+    "EXCHANGE": env(
+        "RABBITMQ_EXCHANGE",
+        default="rr-store.events",
+    ),
+}
+
+STORE_SERVICE_URL = env(
+    "STORE_SERVICE_URL",
+    default="http://store-service:8000",
+)

@@ -3,10 +3,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
-from core_apps.common.exceptions import (
+from .exceptions import (
     KeycloakError,
+    StoreServiceUnavailableError,
     UserAlreadyExistsError,
     UserNotFoundError,
+    UserOwnsStoresError,
 )
 
 
@@ -44,6 +46,18 @@ def handle_application_exception(
         return Response(
             {"detail": str(exception)},
             status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if isinstance(exception, UserOwnsStoresError):
+        return Response(
+            {"detail": str(exception)},
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    if isinstance(exception, StoreServiceUnavailableError):
+        return Response(
+            {"detail": str(exception)},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
     return exception_handler(exception, context)

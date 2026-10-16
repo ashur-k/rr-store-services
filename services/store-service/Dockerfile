@@ -2,6 +2,8 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
+ENV PATH="/app/.venv/bin:$PATH"
+
 RUN pip install uv
 
 COPY pyproject.toml uv.lock ./

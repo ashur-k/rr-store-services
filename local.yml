@@ -28,12 +28,32 @@ services:
     tty: true
     networks:
       - rr-store
+  
+  user-service-outbox-worker:
+    container_name: user-service-outbox-worker
+    restart: unless-stopped
+    build:
+      context: ./services/user-service
+    command: python manage.py publish_outbox
+    env_file:
+      - path: ./services/user-service/.envs/local/.env-user-service
+        required: true
+      - path: ./services/user-service/.envs/local/.env-postgres
+        required: true
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - rr-store
 
   store-service:
     container_name: store-service
     build:
       context: ./services/store-service/
       dockerfile: Dockerfile
+    env_file:
+      - path: ./services/store-service/.envs/local/.env-store-service
+        required: true
     volumes:
       - ./services/store-service:/app
       - store_service_venv:/app/.venv
@@ -137,6 +157,15 @@ services:
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
     volumes:
       - ./infrastructure/local/kong/kong.yml:/kong/declarative/kong.yml:ro
+    networks:
+      - rr-store
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - rr-store
 

@@ -1,5 +1,3 @@
-
-
 class ApplicationError(Exception):
     """Base exception for application-level errors."""
 
@@ -18,3 +16,11 @@ class KeycloakError(ApplicationError):
 
 class KeycloakUserNotFoundError(KeycloakError):
     pass
+
+
+class UserOwnsStoresError(ApplicationError):
+    """Raised when a user owns stores and cannot be deleted."""
+
+
+class StoreServiceUnavailableError(ApplicationError):
+    """Raised when store ownership cannot be verified."""

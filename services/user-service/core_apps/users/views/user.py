@@ -19,6 +19,7 @@ def serialize_user(user: User) -> dict:
         id=user.id,
         kc_id=str(user.kc_id),
         email=user.email,
+        role="role",
     ).model_dump(mode="json")
 
 
@@ -103,6 +104,4 @@ class UserDetailView(APIView):
     ):
         user_service.delete_user(user_id)
 
-        return Response(
-            status=status.HTTP_204_NO_CONTENT,
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)

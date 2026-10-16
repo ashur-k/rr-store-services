@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.store import Store
@@ -10,19 +12,61 @@ class StoreRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(
+    async def get_all_stores(self):
+        result = await self.db.execute(select(Store))
+        return result.scalars().all()
+
+    async def get_by_owner(self, owner_id: UUID) -> list[Store]:
+        result = await self.db.execute(select(Store).where(Store.owner_id == owner_id))
+
+        return list(result.scalars().all())
+
+    async def get_by_slug(
         self,
-        store_data: StoreCreate,
-        owner_id: UUID,
-    ) -> Store:
+        slug: str,
+    ) -> Store | None:
+        result = await self.db.execute(select(Store).where(Store.slug == slug))
+
+        return result.scalar_one_or_none()
+
+    async def create(self, store_data: StoreCreate) -> Store:
         store = Store(
-            owner_id=owner_id,
+            owner_id=store_data.owner_id,
             name=store_data.name,
+            slug=store_data.slug,
             description=store_data.description,
         )
 
         self.db.add(store)
-        await self.db.commit()
-        await self.db.refresh(store)
+        try:
+            await self.db.commit()
+            await self.db.refresh(store)
+        except IntegrityError as exc:
+            print(f"Original database error: {exc.orig!r}", flush=True)
+
+            try:
+                await self.db.rollback()
+            except Exception as rollback_exc:
+                print(
+                    f"Rollback also failed: {rollback_exc!r}",
+                    flush=True,
+                )
+
+                raise
 
         return store
+
+    async def get_by_id(
+        self,
+        store_id: UUID,
+    ) -> Store | None:
+        result = await self.db.execute(select(Store).where(Store.id == store_id))
+
+        return result.scalar_one_or_none()
+
+    async def owner_has_stores(self, owner_id: UUID) -> bool:
+        result = await self.db.execute(
+            select(Store.id).where(Store.owner_id == owner_id).limit(1)
+        )
+
+        return result.scalar_one_or_none() is not None

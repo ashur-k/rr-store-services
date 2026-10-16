@@ -13,6 +13,7 @@ from core_apps.common.exceptions import (
     KeycloakError,
     KeycloakUserNotFoundError,
 )
+from core_apps.users.schemas.store_owner import KeycloakStoreUserCreate
 
 from ..schemas import KeycloakUserCreate, KeycloakUserUpdate
 
@@ -66,6 +67,33 @@ class KeycloakClient:
         except (KeycloakAuthenticationError, KeycloakConnectionError, KeycloakPostError) as exc:
             raise KeycloakError("Failed to create user in Keycloak.") from exc
 
+    def create_store_user(self, data: KeycloakStoreUserCreate) -> str:
+        """Create a store user in Keycloak with a temporary password."""
+
+        try:
+            return self._client.create_user(
+                {
+                    "username": data.email,
+                    "email": data.email,
+                    "firstName": data.first_name,
+                    "lastName": data.last_name,
+                    "enabled": True,
+                    "credentials": [
+                        {
+                            "type": "password",
+                            "value": data.password,
+                            "temporary": True,
+                        }
+                    ],
+                }
+            )
+        except (
+            KeycloakAuthenticationError,
+            KeycloakConnectionError,
+            KeycloakPostError,
+        ) as exc:
+            raise KeycloakError("Failed to create store owner in Keycloak.") from exc
+
     def update_user(self, user_id: str, data: KeycloakUserUpdate) -> None:
         """Update a user in Keycloak."""
 
@@ -93,3 +121,35 @@ class KeycloakClient:
             raise KeycloakError("Failed to delete user from Keycloak.") from exc
         except (KeycloakAuthenticationError, KeycloakConnectionError) as exc:
             raise KeycloakError("Failed to delete user from Keycloak.") from exc
+
+    def assign_realm_role(self, user_id: str, role_name: str) -> None:
+        """Assign a realm role to a Keycloak user."""
+
+        try:
+            role = self._client.get_realm_role(role_name)
+
+            self._client.assign_realm_roles(
+                user_id=user_id,
+                roles=[role],
+            )
+        except (
+            KeycloakAuthenticationError,
+            KeycloakConnectionError,
+            KeycloakGetError,
+            KeycloakPostError,
+        ) as exc:
+            raise KeycloakError(f"Failed to assign realm role '{role_name}' to user.") from exc
+
+    def get_users_by_realm_role(self, role_name: str) -> list[dict]:
+        """Return users assigned to a realm role in Keycloak."""
+
+        try:
+            role = self._client.get_realm_role(role_name)
+
+            return self._client.get_realm_role_members(role_name=role["name"])
+        except (
+            KeycloakAuthenticationError,
+            KeycloakConnectionError,
+            KeycloakGetError,
+        ) as exc:
+            raise KeycloakError(f"Failed to retrieve users with realm role '{role_name}'.") from exc
