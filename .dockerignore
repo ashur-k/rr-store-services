@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# JavaScript dependencies and build output
+**/node_modules
+**/dist
+
+# Python virtual environments and caches
+**/.venv
+**/venv
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.ruff_cache
+**/htmlcov
+**/.coverage
+**/coverage.xml
+
+# Environment files and secrets
+**/.env
+**/.env.*
+**/*secrets*
+**/*secret*
+
+# Local database backups
+infrastructure/local/postgres/backups/
+
+# Logs and editor files
+**/*.log
+**/.vscode
+**/.idea
+
+# Operating system files
+**/.DS_Store
+**/Thumbs.db

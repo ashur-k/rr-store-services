@@ -1,0 +1,221 @@
+
+services:
+
+  user-service:
+    build:
+      context: ../../services/user-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?Set DJANGO_ALLOWED_HOSTS in .env}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:?Set DJANGO_CSRF_TRUSTED_ORIGINS in .env}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: user-service
+      POSTGRES_USER: user_service
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD:?Set USER_SERVICE_DB_PASSWORD in .env}
+      KC_SERVER_URL: http://keycloak:8080
+      KC_BROWSER_SERVER_URL: ${KC_BROWSER_SERVER_URL:?Set KC_BROWSER_SERVER_URL in .env}
+      KC_REALM: ${KC_REALM:?Set KC_REALM in .env}
+      OIDC_RP_CLIENT_ID: ${OIDC_RP_CLIENT_ID:?Set OIDC_RP_CLIENT_ID in .env}
+      OIDC_RP_CLIENT_SECRET: ${OIDC_RP_CLIENT_SECRET:?Set OIDC_RP_CLIENT_SECRET in .env}
+      KC_ADMIN_CLIENT_ID: ${KC_ADMIN_CLIENT_ID:?Set KC_ADMIN_CLIENT_ID in .env}
+      KC_ADMIN_CLIENT_SECRET: ${KC_ADMIN_CLIENT_SECRET:?Set KC_ADMIN_CLIENT_SECRET in .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:?Set RABBITMQ_USERNAME in .env}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      STORE_SERVICE_M2M_CLIENT_ID: ${STORE_SERVICE_M2M_CLIENT_ID:?Set STORE_SERVICE_M2M_CLIENT_ID in .env}
+      STORE_SERVICE_M2M_CLIENT_SECRET: ${STORE_SERVICE_M2M_CLIENT_SECRET:?Set STORE_SERVICE_M2M_CLIENT_SECRET in .env}
+      STORE_SERVICE_URL: http://store-service:8000
+    command:
+      - sh
+      - -c
+      - python manage.py migrate --no-input && python manage.py collectstatic --no-input && gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - user_staticfiles:/app/staticfiles
+      - user_mediafiles:/app/mediafiles
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  store-service:
+    build:
+      context: ../../services/store-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://store_service:${STORE_SERVICE_DB_PASSWORD:?Set STORE_SERVICE_DB_PASSWORD in .env}@postgres:5432/store-service
+      KC_SERVER_URL: http://keycloak:8080
+      KC_BROWSER_SERVER_URL: ${KC_BROWSER_SERVER_URL:?Set KC_BROWSER_SERVER_URL in .env}
+      KC_REALM: ${KC_REALM:?Set KC_REALM in .env}
+      KC_AUDIENCE: ${KC_AUDIENCE:-account}
+      KC_M2M_AUDIENCE: ${KC_M2M_AUDIENCE:-store-service}
+      KC_M2M_CLIENT_ID: ${KC_M2M_CLIENT_ID:?Set KC_M2M_CLIENT_ID in .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:?Set RABBITMQ_USERNAME in .env}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  user-service-outbox-worker:
+    build:
+      context: ../../services/user-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: user-service
+      POSTGRES_USER: user_service
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD:?Set USER_SERVICE_DB_PASSWORD in .env}
+      KC_SERVER_URL: http://keycloak:8080
+      KC_BROWSER_SERVER_URL: ${KC_BROWSER_SERVER_URL:?Set KC_BROWSER_SERVER_URL in .env}
+      KC_REALM: ${KC_REALM:?Set KC_REALM in .env}
+      OIDC_RP_CLIENT_ID: ${OIDC_RP_CLIENT_ID:?Set OIDC_RP_CLIENT_ID in .env}
+      OIDC_RP_CLIENT_SECRET: ${OIDC_RP_CLIENT_SECRET:?Set OIDC_RP_CLIENT_SECRET in .env}
+      KC_ADMIN_CLIENT_ID: ${KC_ADMIN_CLIENT_ID:?Set KC_ADMIN_CLIENT_ID in .env}
+      KC_ADMIN_CLIENT_SECRET: ${KC_ADMIN_CLIENT_SECRET:?Set KC_ADMIN_CLIENT_SECRET in .env}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:?Set RABBITMQ_USERNAME in .env}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      STORE_SERVICE_M2M_CLIENT_ID: ${STORE_SERVICE_M2M_CLIENT_ID:?Set STORE_SERVICE_M2M_CLIENT_ID in .env}
+      STORE_SERVICE_M2M_CLIENT_SECRET: ${STORE_SERVICE_M2M_CLIENT_SECRET:?Set STORE_SERVICE_M2M_CLIENT_SECRET in .env}
+      STORE_SERVICE_URL: http://store-service:8000
+    command: ["python", "manage.py", "publish_outbox"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  kong:
+    image: kong:3.9
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: "off"
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+    volumes:
+      - ./kong/kong.yml:/etc/kong/kong.yml:ro
+    depends_on:
+      - user-service
+      - store-service
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      USER_SERVICE_DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD:?Set USER_SERVICE_DB_PASSWORD in .env}
+      STORE_SERVICE_DB_PASSWORD: ${STORE_SERVICE_DB_PASSWORD:?Set STORE_SERVICE_DB_PASSWORD in .env}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Set KEYCLOAK_DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./postgres/init-databases.sh:/docker-entrypoint-initdb.d/10-init-databases.sh:ro
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?Set RABBITMQ_DEFAULT_USER in .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Set RABBITMQ_DEFAULT_PASS in .env}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    restart: unless-stopped
+    command: start
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${KC_DB_USERNAME:?Set KC_DB_USERNAME in .env}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Set KEYCLOAK_DB_PASSWORD in .env}
+      KC_HOSTNAME: https://rr-store.co.uk
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?Set KC_BOOTSTRAP_ADMIN_USERNAME in .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?Set KC_BOOTSTRAP_ADMIN_PASSWORD in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+  nginx:
+    build:
+      context: ../..
+      dockerfile: infrastructure/production/nginx/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - kong
+      - user-service
+      - store-service
+      - keycloak
+    volumes:
+      - user_staticfiles:/app/staticfiles:ro
+      - user_mediafiles:/app/mediafiles:ro
+    networks:
+      - backend
+      - edge
+
+networks:
+  backend:
+    driver: bridge
+    internal: true
+  edge:
+    external: true
+    name: rr-store-edge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  user_staticfiles:
+  user_mediafiles:
