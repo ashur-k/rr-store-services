@@ -1,3 +1,5 @@
+import logging
+
 from keycloak import KeycloakAdmin
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
@@ -16,6 +18,8 @@ from core_apps.common.exceptions import (
 from core_apps.users.schemas.store_owner import KeycloakStoreUserCreate
 
 from ..schemas import KeycloakUserCreate, KeycloakUserUpdate
+
+logger = logging.getLogger(__name__)
 
 
 class KeycloakClient:
@@ -65,6 +69,7 @@ class KeycloakClient:
                 }
             )
         except (KeycloakAuthenticationError, KeycloakConnectionError, KeycloakPostError) as exc:
+            logger.exception("Keycloak create_user request failed")
             raise KeycloakError("Failed to create user in Keycloak.") from exc
 
     def create_store_user(self, data: KeycloakStoreUserCreate) -> str:
