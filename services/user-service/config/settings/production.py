@@ -1,5 +1,6 @@
 from .base import *  # noqa
 from .base import env
+import re
 
 DEBUG = False
 
@@ -19,3 +20,4 @@ X_FRAME_OPTIONS = "DENY"
 
 OIDC_REDIRECT_URI = "https://rr-store.co.uk/oidc/callback/"
 CORS_ALLOWED_ORIGINS = ["https://rr-store.co.uk"]
+OIDC_EXEMPT_URLS = [re.compile(r"^/api/")]
