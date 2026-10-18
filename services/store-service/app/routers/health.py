@@ -1,5 +1,6 @@
-from app.core.authentication import authenticate
 from fastapi import APIRouter, Depends
+
+from app.core.authentication import authenticate
 
 router = APIRouter()
 

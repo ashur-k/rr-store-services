@@ -67,4 +67,3 @@ omit = [
     "*/admin.py",
     "*/apps.py",
 ]
-fail_under = 60

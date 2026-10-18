@@ -82,6 +82,31 @@ jobs:
           name: backend-coverage-report
           path: services/user-service/htmlcov/
 
+  store-service-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.19"
+
+      - name: Install dependencies
+        working-directory: services/store-service
+        run: uv sync --locked
+
+      - name: Run Ruff
+        working-directory: services/store-service
+        run: uvx ruff==0.16.5 check app
+
   frontend-build:
     runs-on: ubuntu-latest
 
