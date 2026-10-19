@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.authentication import (
@@ -15,7 +15,11 @@ from database import get_db
 router = APIRouter()
 
 
-@router.get("/all/", response_model=list[StoreResponse])
+@router.get(
+    "/all/",
+    response_model=list[StoreResponse],
+    status_code=status.HTTP_200_OK,
+)
 async def get_stores(
     current_user: dict = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
@@ -25,7 +29,11 @@ async def get_stores(
     return await service.get_all_stores()
 
 
-@router.post("/", response_model=StoreResponse)
+@router.post(
+    "/",
+    response_model=StoreResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_store(
     store_data: StoreCreate,
     current_user: dict = Depends(require_admin),
@@ -58,3 +66,20 @@ async def owner_has_stores(
     service = StoreService(db)
 
     return {"has_stores": await service.owner_has_stores(owner_id)}
+
+
+@router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_store(
+    store_id: UUID,
+    current_user: dict = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+
+    deleted = await service.delete_store(store_id)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store not found",
+        )

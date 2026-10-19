@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -70,3 +70,15 @@ class StoreRepository:
         )
 
         return result.scalar_one_or_none() is not None
+
+    async def delete(self, store_id: UUID) -> bool:
+        statement = delete(Store).where(Store.id == store_id).returning(Store.id)
+
+        result = await self.db.execute(statement)
+        deleted_id = result.scalar_one_or_none()
+
+        if deleted_id is None:
+            return False
+
+        await self.db.commit()
+        return True

@@ -9,3 +9,7 @@ export const getMyStores = async () => {
   const response = await api.get("/stores/all/");
   return response.data;
 };
+
+export async function deleteStore(storeId: string): Promise<void> {
+  await api.delete(`/stores/${storeId}`);
+}

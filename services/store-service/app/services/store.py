@@ -25,7 +25,7 @@ class StoreService:
             owner_id=owner_id,
         )
 
-    async def get_owned_store(
+    async def get_store_by_id(
         store_id: UUID,
         owner_id: UUID,
         db: AsyncSession,
@@ -67,3 +67,6 @@ class StoreService:
 
     async def owner_has_stores(self, owner_id: UUID) -> bool:
         return await self.repository.owner_has_stores(owner_id)
+
+    async def delete_store(self, store_id: UUID) -> bool:
+        return await self.repository.delete(store_id)
