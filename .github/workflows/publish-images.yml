@@ -1,0 +1,84 @@
+name: Publish Production Images
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate-ci:
+    name: Validate successful CI run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify triggering CI run
+        env:
+          CI_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          CI_EVENT: ${{ github.event.workflow_run.event }}
+          CI_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          test "$CI_CONCLUSION" = "success"
+          test "$CI_EVENT" = "push"
+          test "$CI_BRANCH" = "main"
+
+  publish-images:
+    name: Build and publish application images
+    needs: validate-ci
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push user-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/user-service
+          file: ./services/user-service/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ashur-k/rr-store-services-user-service:${{ github.event.workflow_run.head_sha }}
+
+      - name: Build and push store-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/store-service
+          file: ./services/store-service/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ashur-k/rr-store-services-store-service:${{ github.event.workflow_run.head_sha }}
+
+      - name: Build and push frontend/nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./infrastructure/production/nginx/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_URL=/api
+            VITE_KEYCLOAK_URL=https://rr-store.co.uk
+            VITE_KEYCLOAK_REALM=rr-store
+            VITE_KEYCLOAK_CLIENT_ID=rr-store-frontend
+          tags: |
+            ghcr.io/ashur-k/rr-store-services-frontend:${{ github.event.workflow_run.head_sha }}
