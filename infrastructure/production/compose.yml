@@ -2,9 +2,7 @@
 services:
 
   user-service:
-    build:
-      context: ../../services/user-service
-      dockerfile: Dockerfile
+    image: ghcr.io/ashur-k/rr-store-services-user-service:${IMAGE_TAG:?Set IMAGE_TAG}
     restart: unless-stopped
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
@@ -47,9 +45,7 @@ services:
       - backend
 
   store-service:
-    build:
-      context: ../../services/store-service
-      dockerfile: Dockerfile
+    image: ghcr.io/ashur-k/rr-store-services-store-service:${IMAGE_TAG:?Set IMAGE_TAG}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://store_service:${STORE_SERVICE_DB_PASSWORD:?Set STORE_SERVICE_DB_PASSWORD in .env}@postgres:5432/store-service
@@ -77,9 +73,7 @@ services:
       - backend
 
   user-service-outbox-worker:
-    build:
-      context: ../../services/user-service
-      dockerfile: Dockerfile
+    image: ghcr.io/ashur-k/rr-store-services-user-service:${IMAGE_TAG:?Set IMAGE_TAG}
     restart: unless-stopped
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
@@ -195,14 +189,7 @@ services:
       - /opt/rr-store/rr-store-realm.json:/opt/keycloak/data/import/rr-store-realm.json:ro
 
   nginx:
-    build:
-      context: ../..
-      dockerfile: infrastructure/production/nginx/Dockerfile
-      args:
-        VITE_API_URL: /api
-        VITE_KEYCLOAK_URL: https://rr-store.co.uk
-        VITE_KEYCLOAK_REALM: rr-store
-        VITE_KEYCLOAK_CLIENT_ID: rr-store-frontend
+    image: ghcr.io/ashur-k/rr-store-services-frontend:${IMAGE_TAG:?Set IMAGE_TAG}
     restart: unless-stopped
     depends_on:
       - kong
