@@ -226,3 +226,15 @@ node_modules/
 # Database backups
 *.sql
 *.sql.gz
+
+# VS Code settings
+.vscode/settings.json
+services/store-service/.vscode/settings.json
+services/user-service/.vscode/settings.json
+
+# Local documentation
+docs/user-stories.md
+docs/useful_commands.md
+
+# Keycloak realm export
+keycloak-export/
