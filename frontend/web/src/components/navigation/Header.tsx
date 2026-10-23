@@ -8,13 +8,13 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/useAuth";
 import { useStoresWithOwners } from "../../features/users/hooks/useStoresWithOwners";
-import { useCategories } from "../../features/product/hooks/useProducts";
+
 import "./Header.css";
 
 function Header() {
   const { isAuthenticated, login, logout } = useAuth();
   const { data: stores = [] } = useStoresWithOwners();
-  const { data: categories = [] } = useCategories();
+  
   const [search, setSearch] = useState("");
 
   return (
