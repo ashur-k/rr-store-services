@@ -21,7 +21,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
 )
 async def get_stores(
-    current_user: dict = Depends(require_admin),
+    current_user: dict = Depends(require_store_ownership_check),
     db: AsyncSession = Depends(get_db),
 ):
     service = StoreService(db)

@@ -43,16 +43,8 @@ class StoreRepository:
             await self.db.refresh(store)
         except IntegrityError as exc:
             print(f"Original database error: {exc.orig!r}", flush=True)
-
-            try:
-                await self.db.rollback()
-            except Exception as rollback_exc:
-                print(
-                    f"Rollback also failed: {rollback_exc!r}",
-                    flush=True,
-                )
-
-                raise
+            await self.db.rollback()
+            raise
 
         return store
 

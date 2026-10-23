@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from django.db import transaction
@@ -195,4 +196,65 @@ class UserService:
             }
             for user in users
             if user["id"] in local_users_by_kc_id
+        ]
+
+    async def aget_store_users(self) -> list[dict]:
+        """Return users with the store_owner realm role asynchronously."""
+        users = await self.keycloak_client.aget_users_by_realm_role("store_owner")
+        kc_ids = [user["id"] for user in users]
+        local_users_by_kc_id = await self.user_selector.aget_by_kc_ids(kc_ids)
+
+        return [
+            {
+                "id": local_users_by_kc_id[user["id"]].id,
+                "kc_id": user["id"],
+                "username": user["username"],
+                "email": user.get("email"),
+            }
+            for user in users
+            if user["id"] in local_users_by_kc_id
+        ]
+
+    async def aget_stores_with_owners(self) -> list[dict]:
+        """Return stores combined with their owner details."""
+
+        stores, users = await asyncio.gather(
+            self.store_service_client.get_all_stores_async(),
+            self.keycloak_client.aget_users_by_realm_role("store_owner"),
+        )
+
+        kc_ids = [user["id"] for user in users]
+        local_users_by_kc_id = await self.user_selector.aget_by_kc_ids(kc_ids)
+
+        users_by_kc_id = {
+            user["id"]: {
+                "id": local_users_by_kc_id[user["id"]].id,
+                "kc_id": user["id"],
+                "username": user["username"],
+                "email": user.get("email"),
+                "full_name": " ".join(
+                    part
+                    for part in [
+                        user.get("firstName"),
+                        user.get("lastName"),
+                    ]
+                    if part
+                ),
+            }
+            for user in users
+            if user["id"] in local_users_by_kc_id
+        }
+
+        return [
+            {
+                "store_id": store["id"],
+                "store_name": store["name"],
+                "store_description": store.get("description"),
+                "store_user_id": owner["id"] if (owner := users_by_kc_id.get(str(store["owner_id"]))) else None,
+                "store_user_kc_id": owner["kc_id"] if owner else None,
+                "store_user_full_name": owner["full_name"] if owner else None,
+                "store_user_username": owner["username"] if owner else None,
+                "store_user_email": owner["email"] if owner else None,
+            }
+            for store in stores
         ]

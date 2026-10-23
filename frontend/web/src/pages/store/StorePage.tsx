@@ -1,56 +1,90 @@
-import { useState } from "react";
-import { Container, Nav } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
 
-import { ManageStoresTab } from "./tabs/ManageStoresTab";
-import { ManageStoreUsersTab } from "./tabs/ManageStoreUsersTab";
+import { Container, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
-type StoreTab = "manage-store" | "manage-store-users";
+import type { DataTableColumn } from "../../components/tables/DataTable";
+import { DataTable } from "../../components/tables/DataTable";
+import { useStoresWithOwners } from "../../features/users/hooks/useStoresWithOwners";
+import type { StoreWithOwner } from "../../features/users/types";
 
 export function StorePage() {
-  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<StoreTab>(
-    location.state?.activeTab ?? "manage-store",
-  );
+  const {
+    data: stores = [],
+    isLoading,
+    isError,
+  } = useStoresWithOwners();
+
+  const columns: DataTableColumn<StoreWithOwner>[] = [
+    {
+      key: "store_name",
+      header: "Store Name",
+      render: (store) => (
+        <span className="fw-semibold">{store.store_name}</span>
+      ),
+    },
+    {
+      key: "store_user_full_name",
+      header: "User Name",
+      render: (store) => store.store_user_full_name || "—",
+    },
+    {
+      key: "store_user_email",
+      header: "User Email",
+      render: (store) => store.store_user_email,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: () => (
+        <Button
+          type="button"
+          variant="danger"
+          size="sm"
+          disabled
+          title="Delete functionality will be implemented later"
+        >
+          Delete
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <Container fluid className="py-4">
-      <div className="mb-4">
-        <h1 className="h3 mb-1">Store Management</h1>
-        <p className="text-muted mb-0">
-          Manage your stores and the users associated with them.
-        </p>
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h1 className="h3 mb-1">Store Management</h1>
+          <p className="text-muted mb-0">
+            Manage stores and their associated users.
+          </p>
+        </div>
+
+        <div className="d-flex gap-2 flex-wrap">
+          <Button onClick={() => navigate("/store/create")}>
+            <i className="fas fa-store me-2" />
+            Create Store
+          </Button>
+
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate("/store/users/create")}
+          >
+            <i className="fas fa-user-plus me-2" />
+            Create Store User
+          </Button>
+        </div>
       </div>
 
-      <Nav
-        variant="tabs"
-        activeKey={activeTab}
-        onSelect={(key) => {
-          if (key === "manage-store" || key === "manage-store-users") {
-            setActiveTab(key);
-          }
-        }}
-        className="mb-4"
-      >
-        <Nav.Item>
-          <Nav.Link eventKey="manage-store">
-            <i className="fas fa-store me-2" />
-            Manage Store
-          </Nav.Link>
-        </Nav.Item>
-
-        <Nav.Item>
-          <Nav.Link eventKey="manage-store-users">
-            <i className="fas fa-users me-2" />
-            Manage Store Users
-          </Nav.Link>
-        </Nav.Item>
-      </Nav>
-
-      {activeTab === "manage-store" && <ManageStoresTab />}
-
-      {activeTab === "manage-store-users" && <ManageStoreUsersTab />}
+      <DataTable
+        data={stores}
+        columns={columns}
+        getRowKey={(store) => store.store_id}
+        isLoading={isLoading}
+        hasError={isError}
+        emptyMessage="No stores found."
+      />
     </Container>
   );
 }
