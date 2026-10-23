@@ -71,6 +71,7 @@ async def require_store_ownership_check(
     token = credentials.credentials
 
     try:
+        print("WE ARE REACHING THERE")
         signing_key = jwks_client.get_signing_key_from_jwt(token)
 
         payload = jwt.decode(

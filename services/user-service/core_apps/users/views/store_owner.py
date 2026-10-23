@@ -1,13 +1,54 @@
+from asgiref.sync import sync_to_async
 from dependency_injector.wiring import Provide, inject
+from django.http import JsonResponse
+from django.views import View
 from rest_framework import status
+from rest_framework.exceptions import APIException
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.container import Container
+from core_apps.users.auth import KeycloakJWTAuthentication
 
 from ..permissions import IsKeycloakAdminOrStaff
 from ..schemas import CreateStoreUser
 from ..services import UserService
+
+
+class StoreListWithOwnersAsyncView(View):
+    """Return stores with their owner details asynchronously."""
+
+    async def get(self, request):
+        drf_request = Request(
+            request,
+            authenticators=[KeycloakJWTAuthentication()],
+        )
+
+        try:
+            await sync_to_async(lambda: drf_request.user)()
+        except APIException as exc:
+            return JsonResponse(
+                {"detail": str(exc.detail)},
+                status=exc.status_code,
+            )
+
+        permission = IsKeycloakAdminOrStaff()
+        has_permission = await sync_to_async(permission.has_permission)(
+            drf_request,
+            self,
+        )
+
+        if not has_permission:
+            return JsonResponse(
+                {"detail": "You do not have permission to perform this action."},
+                status=403,
+            )
+
+        user_service = Container.user_service()
+        stores = await user_service.aget_stores_with_owners()
+
+        return JsonResponse(stores, safe=False, status=200)
 
 
 class StoreUserListCreateView(APIView):

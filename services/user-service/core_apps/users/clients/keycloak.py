@@ -158,3 +158,15 @@ class KeycloakClient:
             KeycloakGetError,
         ) as exc:
             raise KeycloakError(f"Failed to retrieve users with realm role '{role_name}'.") from exc
+
+    async def aget_users_by_realm_role(self, role_name: str) -> list[dict]:
+        """Return users assigned to a realm role asynchronously."""
+        try:
+            role = await self._client.a_get_realm_role(role_name)
+            return await self._client.a_get_realm_role_members(role_name=role["name"])
+        except (
+            KeycloakAuthenticationError,
+            KeycloakConnectionError,
+            KeycloakGetError,
+        ) as exc:
+            raise KeycloakError(f"Failed to retrieve users with realm role '{role_name}'.") from exc

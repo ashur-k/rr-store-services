@@ -46,3 +46,37 @@ class StoreServiceClient:
         response.raise_for_status()
 
         return response.json()["has_stores"]
+
+    async def _get_access_token_async(self) -> str:
+        """Request a service-account access token asynchronously."""
+        token_url = f"{KEYCLOAK.server_url.rstrip('/')}/realms/{KEYCLOAK.realm}/protocol/openid-connect/token"
+
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                token_url,
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                },
+            )
+            response.raise_for_status()
+
+        return response.json()["access_token"]
+
+    async def get_all_stores_async(self) -> list[dict]:
+        """Retrieve all stores asynchronously."""
+        token = await self._get_access_token_async()
+
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(
+                f"{self.base_url}/all/",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if response.status_code == 401:
+                print("Store Service rejected the M2M token.")
+                print("Response:", response.text)
+
+            response.raise_for_status()
+
+        return response.json()

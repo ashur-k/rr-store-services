@@ -18,11 +18,7 @@ class HasKeycloakRole(BasePermission):
 
         realm_roles = claims.get("realm_access", {}).get("roles", [])
 
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
 
         all_roles = set(realm_roles + client_roles)
 
@@ -50,18 +46,16 @@ class IsKeycloakAdminOrStaff(BasePermission):
         claims = getattr(request.user, "keycloak_claims", None)
 
         if claims is None:
-            if request.auth and isinstance(request.auth, dict):
-                claims = request.auth
+            auth = getattr(request, "auth", None)
+
+            if isinstance(auth, dict):
+                claims = auth
             else:
                 return False
 
         realm_roles = claims.get("realm_access", {}).get("roles", [])
 
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
 
         all_roles = set(realm_roles + client_roles)
 
@@ -91,11 +85,7 @@ class IsSelfOrAdminStaff(BasePermission):
 
         realm_roles = claims.get("realm_access", {}).get("roles", [])
 
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
 
         all_roles = set(realm_roles + client_roles)
 
@@ -108,12 +98,14 @@ class IsSelfOrAdminStaff(BasePermission):
 
 
 def keycloak_role_required(*roles):
-    """ Factory function to create permission classes for specific roles.
+    """Factory function to create permission classes for specific roles.
 
     Usage:
         permission_classes = [keycloak_role_required("editor", "publisher")]
     """
+
     class DynamicRolePermission(HasKeycloakRole):
         required_roles = list(roles)
+
     DynamicRolePermission.__name__ = f"Requires_{'_'.join(roles)}"
     return DynamicRolePermission
