@@ -68,5 +68,18 @@ class StoreService:
     async def owner_has_stores(self, owner_id: UUID) -> bool:
         return await self.repository.owner_has_stores(owner_id)
 
+    async def store_belongs_to_owner(
+        self,
+        store_id: UUID,
+        owner_id: UUID,
+    ) -> bool:
+        return await self.repository.store_belongs_to_owner(
+            store_id=store_id,
+            owner_id=owner_id,
+        )
+
     async def delete_store(self, store_id: UUID) -> bool:
         return await self.repository.delete(store_id)
+
+    async def get_store_by_slug(self, slug: str) -> Store | None:
+        return await self.repository.get_by_slug(slug)

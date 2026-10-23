@@ -11,6 +11,8 @@ import { EditProfilePage } from "../pages/users/EditProfilePage";
 import { ManageUsersPage } from "../pages/users/ManageUsersPage";
 import { ProfilePage } from "../pages/users/ProfilePage";
 import { RegisterPage } from "../pages/users/RegisterPage";
+import StoreOwnerPage from "../pages/store-owner/StoreOwnerPage";
+
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +72,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute roles={["admin"]}>
             <CreateStoreUserPage />
+          </RoleProtectedRoute>
+        ),
+      },
+      {
+        path: "store-owner",
+        element: (
+          <RoleProtectedRoute roles={["store_owner"]}>
+            <StoreOwnerPage />
           </RoleProtectedRoute>
         ),
       },
