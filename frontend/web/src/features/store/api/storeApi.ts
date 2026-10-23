@@ -6,7 +6,7 @@ export const getStoreHealth = async () => {
 };
 
 export const getMyStores = async () => {
-  const response = await api.get("/stores/all/");
+  const response = await api.get("/stores/");
   return response.data;
 };
 

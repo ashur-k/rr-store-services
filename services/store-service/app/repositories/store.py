@@ -63,6 +63,20 @@ class StoreRepository:
 
         return result.scalar_one_or_none() is not None
 
+    async def store_belongs_to_owner(
+        self,
+        store_id: UUID,
+        owner_id: UUID,
+    ) -> bool:
+        result = await self.db.execute(
+            select(Store.id).where(
+                Store.id == store_id,
+                Store.owner_id == owner_id,
+            )
+        )
+
+        return result.scalar_one_or_none() is not None
+
     async def delete(self, store_id: UUID) -> bool:
         statement = delete(Store).where(Store.id == store_id).returning(Store.id)
 

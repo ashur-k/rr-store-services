@@ -68,6 +68,25 @@ services:
     networks:
       - rr-store
 
+  product-service:
+    container_name: product-service
+    build:
+      context: ./services/product-service/
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/product-service:/app
+      - product_service_venv:/app/.venv
+    ports:
+      - "8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    stdin_open: true
+    tty: true
+    networks:
+      - rr-store
+
   frontend:
     container_name: frontend
     build:
@@ -101,6 +120,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  postgres-db-init:
+    build:
+      context: ./infrastructure/local/postgres/
+      dockerfile: Dockerfile
+    env_file:
+      - ./infrastructure/local/postgres/.env
+    environment:
+      PGHOST: postgres
+    entrypoint: ["/bin/bash", "/docker-entrypoint-initdb.d/create_databases..sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rr-store
+    restart: "no"
 
   mailhog:
     container_name: mailhog
@@ -176,6 +211,7 @@ networks:
 volumes:
   user_service_venv:
   store_service_venv:
+  product_service_venv:
   static_volume:
   media_volume:
   frontend_dist:

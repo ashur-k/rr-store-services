@@ -1,0 +1,17 @@
+.store-selector__select {
+  min-height: 42px;
+  min-width: 220px;
+  border-radius: 0;
+  border: 1px solid #000;
+  background-color: #000;
+  color: #fff;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.store-selector__select:focus {
+  border-color: #000;
+  box-shadow: none;
+}

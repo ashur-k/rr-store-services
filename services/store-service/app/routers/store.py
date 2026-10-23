@@ -57,6 +57,24 @@ async def get_my_stores(
     )
 
 
+@router.get("/slug/{slug}")
+async def get_store_by_slug(
+    slug: str,
+    current_user: dict = Depends(authenticate),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+    store = await service.get_store_by_slug(slug)
+
+    if store is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store not found",
+        )
+
+    return {"id": store.id, "slug": store.slug}
+
+
 @router.get("/owners/{owner_id}/exists")
 async def owner_has_stores(
     owner_id: UUID,
@@ -66,6 +84,23 @@ async def owner_has_stores(
     service = StoreService(db)
 
     return {"has_stores": await service.owner_has_stores(owner_id)}
+
+
+@router.get("/owners/{owner_id}/stores/{store_id}/exists")
+async def check_store_ownership(
+    owner_id: UUID,
+    store_id: UUID,
+    current_user: dict = Depends(require_store_ownership_check),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+
+    return {
+        "owns_store": await service.store_belongs_to_owner(
+            store_id=store_id,
+            owner_id=owner_id,
+        )
+    }
 
 
 @router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -83,3 +118,21 @@ async def delete_store(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Store not found",
         )
+
+
+@router.get("/my-stores/{store_id}/ownership")
+async def check_my_store_ownership(
+    store_id: UUID,
+    current_user: dict = Depends(authenticate),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+
+    owner_id = UUID(current_user["sub"])
+
+    return {
+        "owns_store": await service.store_belongs_to_owner(
+            store_id=store_id,
+            owner_id=owner_id,
+        )
+    }

@@ -9,7 +9,7 @@ timestamp=$(date +'%Y_%m_%dT%H_%M_%S')
 
 mkdir -p "/backups/${date_folder}"
 
-for database in "user-service" "keycloak" "store-service"
+for database in "user-service" "keycloak" "store-service" "product-service"
 do
     echo "Backing up ${database}..."
 

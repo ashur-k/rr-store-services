@@ -55,7 +55,7 @@ export function StorePage() {
     <Container fluid className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-          <h1 className="h3 mb-1">Store Management</h1>
+          <h1 className="h3 mb-1">Admin Store Management</h1>
           <p className="text-muted mb-0">
             Manage stores and their associated users.
           </p>

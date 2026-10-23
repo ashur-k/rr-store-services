@@ -21,6 +21,25 @@ services:
           minute: 100
           policy: local
 
+  - name: product-service
+    url: http://product-service:8000
+    connect_timeout: 5000
+    write_timeout: 5000
+    read_timeout: 5000
+    retries: 2
+
+    routes:
+      - name: product-service-route
+        paths:
+          - /api/products
+        strip_path: false
+
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: local
+
   - name: store-service
     url: http://store-service:8000
     connect_timeout: 5000
