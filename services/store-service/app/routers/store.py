@@ -68,6 +68,23 @@ async def owner_has_stores(
     return {"has_stores": await service.owner_has_stores(owner_id)}
 
 
+@router.get("/owners/{owner_id}/stores/{store_id}/exists")
+async def check_store_ownership(
+    owner_id: UUID,
+    store_id: UUID,
+    current_user: dict = Depends(require_store_ownership_check),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+
+    return {
+        "owns_store": await service.store_belongs_to_owner(
+            store_id=store_id,
+            owner_id=owner_id,
+        )
+    }
+
+
 @router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_store(
     store_id: UUID,

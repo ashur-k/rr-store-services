@@ -11,11 +11,11 @@ if [[ -z "$database" || -z "$backup_file" ]]; then
 fi
 
 case "$database" in
-    user-service|keycloak|store-service)
+    user-service|keycloak|store-service|product-service)
         ;;
     *)
         echo "Invalid database: $database"
-        echo "Available databases: user-service, keycloak, store-service"
+        echo "Available databases: user-service, keycloak, store-service, product-service"
         exit 1
         ;;
 esac

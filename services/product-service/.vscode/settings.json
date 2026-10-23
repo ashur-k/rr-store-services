@@ -1,0 +1,18 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "files.trimTrailingWhitespace": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "cSpell.words": [
+        "onupdate",
+        "vhost"
+    ]
+}

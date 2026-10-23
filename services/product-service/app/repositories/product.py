@@ -1,0 +1,71 @@
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.models import Product, ProductImage, ProductVariant, VariantImage
+from app.schemas.product import ProductCreate
+
+
+class ProductRepository:
+    def __init__(self, db: AsyncSession) -> None:
+        self.db = db
+
+    def _product_query(self):
+        return select(Product).options(
+            selectinload(Product.images),
+            selectinload(Product.variants).selectinload(ProductVariant.images),
+        )
+
+    async def create(self, product_data: ProductCreate) -> Product:
+        product = Product(
+            store_id=product_data.store_id,
+            name=product_data.name,
+            description=product_data.description,
+            has_variants=product_data.has_variants,
+            price=product_data.price,
+            stock=product_data.stock,
+        )
+
+        for image_data in product_data.images:
+            product.images.append(
+                ProductImage(
+                    image_url=image_data.image_url,
+                    display_order=image_data.display_order,
+                )
+            )
+
+        if product_data.has_variants:
+            for variant_data in product_data.variants:
+                variant = ProductVariant(
+                    sku=variant_data.sku,
+                    price=variant_data.price,
+                    stock=variant_data.stock,
+                    attributes=variant_data.attributes,
+                )
+
+                for image_data in variant_data.images:
+                    variant.images.append(
+                        VariantImage(
+                            image_url=image_data.image_url,
+                            display_order=image_data.display_order,
+                        )
+                    )
+
+                product.variants.append(variant)
+
+        self.db.add(product)
+        await self.db.commit()
+
+        return await self.get_by_id(product.id)
+
+    async def get_by_id(self, product_id: UUID) -> Product | None:
+        query = self._product_query().where(Product.id == product_id)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+
+    async def get_all(self) -> list[Product]:
+        query = self._product_query().order_by(Product.created_at.desc())
+        result = await self.db.execute(query)
+        return list(result.scalars().all())

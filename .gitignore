@@ -234,10 +234,6 @@ services/user-service/.vscode/settings.json
 
 # Local documentation
 docs/user-stories.md
-
-
-# Local documentation
-docs/user-stories.md
 docs/useful_commands.md
 
 # Keycloak realm export
