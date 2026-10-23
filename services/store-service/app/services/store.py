@@ -80,3 +80,6 @@ class StoreService:
 
     async def delete_store(self, store_id: UUID) -> bool:
         return await self.repository.delete(store_id)
+
+    async def get_store_by_slug(self, slug: str) -> Store | None:
+        return await self.repository.get_by_slug(slug)

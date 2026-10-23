@@ -1,31 +1,49 @@
 
+import { useState } from "react";
 import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/useAuth";
 import { useStoresWithOwners } from "../../features/users/hooks/useStoresWithOwners";
+import { useCategories } from "../../features/product/hooks/useProducts";
+import "./Header.css";
 
 function Header() {
   const { isAuthenticated, login, logout } = useAuth();
   const { data: stores = [] } = useStoresWithOwners();
+  const { data: categories = [] } = useCategories();
+  const [search, setSearch] = useState("");
 
   return (
     <header>
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand href="/">RR Store</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">
+            RR Store
+          </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav
-              className="ms-auto"
-              style={{ maxHeight: "100px" }}
-              navbarScroll
+            <Form
+              className="header-search"
+              role="search"
+              onSubmit={(event) => event.preventDefault()}
             >
-              <Nav.Link href="/cart">
+              <Form.Control
+                type="search"
+                placeholder="Search products..."
+                aria-label="Search products"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </Form>
+
+            <Nav className="ms-auto">
+              <Nav.Link as={Link} to="/cart">
                 <i className="fas fa-shopping-cart m-1"></i>
                 Cart
               </Nav.Link>
@@ -35,9 +53,14 @@ function Header() {
                   {stores.length > 0 && (
                     <Nav.Link as={Link} to="/store">
                       <i className="fas fa-store m-1"></i>
-                      Store
+                      Admin
                     </Nav.Link>
                   )}
+
+                  <Nav.Link as={Link} to="/store-owner">
+                    <i className="fas fa-store m-1"></i>
+                    Store Owner
+                  </Nav.Link>
 
                   <Nav.Link href="/profile">
                     <i className="fas fa-user m-1"></i>

@@ -8,6 +8,14 @@ from app.schemas.product_image import ProductImageResponse
 from app.schemas.variant_image import VariantImageResponse
 
 
+class CategoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    slug: str
+
+
 class ProductImageCreate(BaseModel):
     image_url: str = Field(min_length=1, max_length=2048)
     display_order: int = Field(default=0, ge=0)
@@ -35,6 +43,10 @@ class ProductCreate(BaseModel):
     stock: int | None = Field(default=None, ge=0)
     images: list[ProductImageCreate] = Field(default_factory=list)
     variants: list[ProductVariantCreate] = Field(default_factory=list)
+    category_id: UUID | None = None
+    rate: int = 1
+    new_edition: bool = False
+    discount_30_percent: bool = False
 
     @model_validator(mode="after")
     def validate_product_type(self):
@@ -75,9 +87,14 @@ class ProductResponse(BaseModel):
 
     id: UUID
     store_id: UUID
+    category_id: UUID | None
+    category: CategoryResponse | None = None
     name: str
     description: str | None
     has_variants: bool
+    rate: int
+    new_edition: bool
+    discount_30_percent: bool
     price: Decimal | None
     stock: int | None
     created_at: datetime

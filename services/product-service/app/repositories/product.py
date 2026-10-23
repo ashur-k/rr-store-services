@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import Product, ProductImage, ProductVariant, VariantImage
+from app.models import Category, Product, ProductImage, ProductVariant, VariantImage
 from app.schemas.product import ProductCreate
 
 
@@ -14,6 +14,7 @@ class ProductRepository:
 
     def _product_query(self):
         return select(Product).options(
+            selectinload(Product.category),
             selectinload(Product.images),
             selectinload(Product.variants).selectinload(ProductVariant.images),
         )
@@ -21,9 +22,13 @@ class ProductRepository:
     async def create(self, product_data: ProductCreate) -> Product:
         product = Product(
             store_id=product_data.store_id,
+            category_id=product_data.category_id,
             name=product_data.name,
             description=product_data.description,
             has_variants=product_data.has_variants,
+            rate=product_data.rate,
+            new_edition=product_data.new_edition,
+            discount_30_percent=product_data.discount_30_percent,
             price=product_data.price,
             stock=product_data.stock,
         )
@@ -65,7 +70,24 @@ class ProductRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_by_store(self, store_id: UUID) -> list[Product]:
+        query = (
+            self._product_query()
+            .where(Product.store_id == store_id)
+            .order_by(Product.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def get_all_categories(self) -> list[Category]:
+        query = select(Category).order_by(Category.name)
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
     async def get_all(self) -> list[Product]:
         query = self._product_query().order_by(Product.created_at.desc())
         result = await self.db.execute(query)
         return list(result.scalars().all())
+
+    async def get_category_by_id(self, category_id: UUID) -> Category | None:
+        return await self.db.get(Category, category_id)

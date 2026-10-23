@@ -17,9 +17,7 @@ config.set_main_option(
     settings.database_url.replace("%", "%%"),
 )
 
-# We'll connect our Product models' metadata here in a later step.
-from app.models import Product, ProductImage, ProductVariant, VariantImage
-from app.models.base import Base
+from app.models import Base
 
 target_metadata = Base.metadata
 
