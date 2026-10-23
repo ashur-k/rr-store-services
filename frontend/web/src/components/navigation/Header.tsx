@@ -1,14 +1,15 @@
+
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/useAuth";
-import { useMyStores } from "../../features/store/hooks/useMyStores";
+import { useStoresWithOwners } from "../../features/users/hooks/useStoresWithOwners";
 
 function Header() {
   const { isAuthenticated, login, logout } = useAuth();
-  const { data: stores = [] } = useMyStores();
+  const { data: stores = [] } = useStoresWithOwners();
 
   return (
     <header>
@@ -37,6 +38,7 @@ function Header() {
                       Store
                     </Nav.Link>
                   )}
+
                   <Nav.Link href="/profile">
                     <i className="fas fa-user m-1"></i>
                     Profile
