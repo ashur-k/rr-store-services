@@ -1,0 +1,28 @@
+.product-variant-accordion {
+  overflow: hidden;
+}
+
+.product-variant-accordion > button {
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+  box-shadow: none;
+}
+
+.product-variant-accordion > button:hover,
+.product-variant-accordion > button:active {
+  background-color: transparent;
+  color: inherit;
+}
+
+.product-variant-accordion > button:focus {
+  box-shadow: none;
+}
+
+.product-variant-accordion > button:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: -2px;
+}

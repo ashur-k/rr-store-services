@@ -46,15 +46,14 @@ async def create_store(
 
 @router.get("/", response_model=list[StoreResponse])
 async def get_my_stores(
-    current_user: dict = Depends(authenticate), db: AsyncSession = Depends(get_db)
+    current_user: dict = Depends(authenticate),
+    db: AsyncSession = Depends(get_db),
 ):
     service = StoreService(db)
 
     owner_id = UUID(current_user["sub"])
 
-    return await service.get_my_stores(
-        owner_id=owner_id,
-    )
+    return await service.get_my_stores(owner_id=owner_id)
 
 
 @router.get("/slug/{slug}")
@@ -73,6 +72,24 @@ async def get_store_by_slug(
         )
 
     return {"id": store.id, "slug": store.slug}
+
+
+@router.get("/{store_id}", response_model=StoreResponse)
+async def get_store_by_id(
+    store_id: UUID,
+    current_user: dict = Depends(authenticate),
+    db: AsyncSession = Depends(get_db),
+):
+    service = StoreService(db)
+    store = await service.get_store_by_id(store_id)
+
+    if store is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store not found",
+        )
+
+    return store
 
 
 @router.get("/owners/{owner_id}/exists")

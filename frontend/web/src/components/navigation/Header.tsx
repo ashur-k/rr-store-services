@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
@@ -14,7 +13,7 @@ import "./Header.css";
 function Header() {
   const { isAuthenticated, login, logout } = useAuth();
   const { data: stores = [] } = useStoresWithOwners();
-  
+
   const [search, setSearch] = useState("");
 
   return (

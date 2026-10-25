@@ -1,9 +1,11 @@
 from typing import Annotated
+from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.clients.store_client import user_owns_store
 from app.core.config import settings
 
 security = HTTPBearer()
@@ -38,7 +40,12 @@ async def authenticate(
     return payload
 
 
-async def require_store_owner(
+async def require_store_ownership(
+    store_id: UUID,
+    credentials: Annotated[
+        HTTPAuthorizationCredentials,
+        Depends(security),
+    ],
     current_user: Annotated[dict, Depends(authenticate)],
 ) -> dict:
     roles = current_user.get("realm_access", {}).get("roles", [])
@@ -47,6 +54,17 @@ async def require_store_owner(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Store owner role required",
+        )
+
+    owns_store = await user_owns_store(
+        store_id=str(store_id),
+        access_token=credentials.credentials,
+    )
+
+    if not owns_store:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not own this store",
         )
 
     return current_user

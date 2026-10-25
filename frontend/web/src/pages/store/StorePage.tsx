@@ -1,5 +1,4 @@
-
-import { Container, Button } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 import type { DataTableColumn } from "../../components/tables/DataTable";
@@ -10,11 +9,7 @@ import type { StoreWithOwner } from "../../features/users/types";
 export function StorePage() {
   const navigate = useNavigate();
 
-  const {
-    data: stores = [],
-    isLoading,
-    isError,
-  } = useStoresWithOwners();
+  const { data: stores = [], isLoading, isError } = useStoresWithOwners();
 
   const columns: DataTableColumn<StoreWithOwner>[] = [
     {

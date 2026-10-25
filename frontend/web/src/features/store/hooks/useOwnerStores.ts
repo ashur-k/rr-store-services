@@ -1,17 +1,16 @@
-
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import type { AppDispatch, RootState } from "../../../app/store";
+import type { AppDispatch, RootState } from "../../../app/reduxStore";
+import { setSelectedStoreId, setStores } from "../storeSlice";
 import { useMyStores } from "./useMyStores";
-import { setSelectedStoreSlug, setStores } from "../storeSlice";
 
 export function useOwnerStores() {
   const dispatch = useDispatch<AppDispatch>();
   const query = useMyStores();
 
-  const selectedStoreSlug = useSelector(
-    (state: RootState) => state.stores.selectedStoreSlug,
+  const selectedStoreId = useSelector(
+    (state: RootState) => state.stores.selectedStoreId,
   );
 
   useEffect(() => {
@@ -21,21 +20,19 @@ export function useOwnerStores() {
   }, [dispatch, query.data]);
 
   const activeStore =
-    query.data?.find((store) => store.slug === selectedStoreSlug) ??
+    query.data?.find((store) => store.id === selectedStoreId) ??
     query.data?.[0];
 
-  const activeStoreSlug = activeStore?.slug ?? "";
   const activeStoreId = activeStore?.id ?? "";
 
-  function selectStore(slug: string) {
-    dispatch(setSelectedStoreSlug(slug));
+  function selectStore(id: string) {
+    dispatch(setSelectedStoreId(id));
   }
 
   return {
     ...query,
     stores: query.data ?? [],
-    selectedStoreSlug: activeStoreSlug,
     selectedStoreId: activeStoreId,
     selectStore,
-};
+  };
 }
