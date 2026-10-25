@@ -21,3 +21,8 @@ dependencies = [
 
 [tool.ruff.lint]
 ignore = ["B008"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.2",
+]

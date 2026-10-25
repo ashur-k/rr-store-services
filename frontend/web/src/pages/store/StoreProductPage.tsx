@@ -1,4 +1,3 @@
-
 import { Badge, Button, Card, Col, Container, Row } from "react-bootstrap";
 
 const products = [

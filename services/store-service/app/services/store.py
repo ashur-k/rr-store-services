@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,28 +24,8 @@ class StoreService:
             owner_id=owner_id,
         )
 
-    async def get_store_by_id(
-        store_id: UUID,
-        owner_id: UUID,
-        db: AsyncSession,
-    ):
-        repository = StoreRepository(db)
-
-        store = await repository.get_by_id(store_id)
-
-        if store is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Store not found",
-            )
-
-        if store.owner_id != owner_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not own this store",
-            )
-
-        return store
+    async def get_store_by_id(self, store_id: UUID):
+        return await self.repository.get_by_id(store_id=store_id)
 
     async def create_store(self, store_data: StoreCreate) -> Store:
         try:
