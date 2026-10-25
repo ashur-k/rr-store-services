@@ -19,6 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.color import Color
     from app.models.product import Product
     from app.models.variant_image import VariantImage
 
@@ -38,6 +39,13 @@ class ProductVariant(Base):
         PostgreSQLUUID(as_uuid=True),
         ForeignKey("products.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+    )
+
+    color_id: Mapped[UUID | None] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("colors.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
 
@@ -64,6 +72,10 @@ class ProductVariant(Base):
     )
 
     product: Mapped[Product] = relationship(
+        back_populates="variants",
+    )
+
+    color: Mapped[Color | None] = relationship(
         back_populates="variants",
     )
 

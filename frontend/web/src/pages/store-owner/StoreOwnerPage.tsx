@@ -1,39 +1,43 @@
-
-import "./StoreOwnerPage.css";
 import {
   Alert,
   Badge,
-  Button,
   Container,
-  Form,
   Image,
   Nav,
   Spinner,
   Tab,
 } from "react-bootstrap";
 
+import Button from "../../components/buttons/Button";
+import "./StoreOwnerPage.css";
+
+import { useNavigate } from "react-router-dom";
+import { SelectField } from "../../components/forms/SelectField";
 import type { DataTableColumn } from "../../components/tables/DataTable";
 import { DataTable } from "../../components/tables/DataTable";
-import { useProductsByStore } from "../../features/product/hooks/useProducts";
 import type { Product } from "../../features/product/api/types";
-
-
+import {
+  useDeleteProduct,
+  useProductsByStore,
+} from "../../features/product/hooks/useProducts";
 import { useOwnerStores } from "../../features/store/hooks/useOwnerStores";
 
 function StoreOwnerPage() {
+  const navigate = useNavigate();
+  const deleteProductMutation = useDeleteProduct();
   const {
     data: stores = [],
     isLoading: storesLoading,
     isError: storesError,
-    selectedStoreSlug,
+    selectedStoreId,
     selectStore,
   } = useOwnerStores();
 
-const {
-  data: products = [],
-  isLoading: productsLoading,
-  isError: productsError,
-} = useProductsByStore(selectedStoreSlug);
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProductsByStore(selectedStoreId);
 
   const productColumns: DataTableColumn<Product>[] = [
     {
@@ -63,14 +67,10 @@ const {
           <div>
             <div className="fw-semibold">{product.name}</div>
             {product.description && (
-              <small className="text-muted">
-                {product.description}
-              </small>
+              <small className="text-muted">{product.description}</small>
             )}
             <div className="d-flex gap-1 mt-1 flex-wrap">
-              {product.new_edition && (
-                <Badge bg="info">New</Badge>
-              )}
+              {product.new_edition && <Badge bg="info">New</Badge>}
               {product.discount_30_percent && (
                 <Badge bg="danger">30% off</Badge>
               )}
@@ -110,31 +110,45 @@ const {
             </small>
           </div>
         ) : (
-          product.stock ?? "—"
+          (product.stock ?? "—")
         ),
     },
     {
       key: "actions",
       header: "Actions",
-      render: () => (
+      render: (product) => (
         <div className="d-flex gap-2">
           <Button
             type="button"
-            variant="outline-primary"
-            size="sm"
-            disabled
-            title="Product editing is not implemented yet"
+            variant="secondary"
+            className="btn-sm"
+            onClick={() =>
+              navigate(
+                `/store-owner/products/${encodeURIComponent(product.id)}/edit?storeId=${encodeURIComponent(selectedStoreId)}`,
+              )
+            }
           >
             Edit
           </Button>
           <Button
             type="button"
-            variant="outline-danger"
-            size="sm"
-            disabled
-            title="Product deletion is not implemented yet"
+            variant="danger"
+            className="btn-sm"
+            disabled={deleteProductMutation.isPending}
+            onClick={() => {
+              const confirmed = window.confirm(
+                `Are you sure you want to delete "${product.name}"? This action cannot be undone.`,
+              );
+
+              if (confirmed) {
+                deleteProductMutation.mutate({
+                  storeId: selectedStoreId,
+                  productId: product.id,
+                });
+              }
+            }}
           >
-            Delete
+            {deleteProductMutation.isPending ? "Deleting..." : "Delete"}
           </Button>
         </div>
       ),
@@ -144,7 +158,7 @@ const {
   return (
     <Container className="py-4">
       <h1>
-        {stores.find((store) => store.slug === selectedStoreSlug)?.name ??
+        {stores.find((store) => store.slug === selectedStoreId)?.name ??
           "Store Owner"}
       </h1>
 
@@ -174,9 +188,7 @@ const {
             )}
 
             {!storesLoading && !storesError && stores.length === 0 && (
-              <Alert variant="info">
-                You don't have any stores yet.
-              </Alert>
+              <Alert variant="info">You don't have any stores yet.</Alert>
             )}
 
             {!storesLoading && !storesError && stores.length > 0 && (
@@ -189,20 +201,31 @@ const {
                     </p>
                   </div>
 
-                  <Form.Group className="store-selector">
-                    <Form.Select
-                      value={selectedStoreSlug}
-                      onChange={(event) => selectStore(event.target.value)}
-                      disabled={storesLoading || stores.length === 0}
-                      className="store-selector__select"
+                  <div className="d-flex align-items-center gap-3">
+                    <Button
+                      type="button"
+                      className="create-product-button"
+                      onClick={() =>
+                        navigate(
+                          `/store-owner/products/create?storeId=${encodeURIComponent(selectedStoreId)}`,
+                        )
+                      }
                     >
-                      {stores.map((store) => (
-                        <option key={store.id} value={store.slug}>
-                          {store.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
+                      <i className="fas fa-plus me-2" />
+                      Create Product
+                    </Button>
+                    <SelectField
+                      value={selectedStoreId}
+                      onChange={selectStore}
+                      disabled={storesLoading || stores.length === 0}
+                      groupClassName="store-selector mb-0"
+                      className="store-selector__select"
+                      options={stores.map((store) => ({
+                        value: store.id,
+                        label: store.name,
+                      }))}
+                    />
+                  </div>
                 </div>
 
                 <DataTable

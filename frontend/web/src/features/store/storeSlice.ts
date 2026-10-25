@@ -1,17 +1,8 @@
-
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import type { Store } from "./types";
+import type { Store, StoresState } from "./types";
 
-interface StoresState {
-  stores: Store[];
-  selectedStoreSlug: string | null;
-}
-
-const initialState: StoresState = {
-  stores: [],
-  selectedStoreSlug: null,
-};
+const initialState: StoresState = { stores: [], selectedStoreId: null };
 
 const storeSlice = createSlice({
   name: "stores",
@@ -21,34 +12,27 @@ const storeSlice = createSlice({
       state.stores = action.payload;
 
       if (
-        !state.selectedStoreSlug ||
-        !action.payload.some(
-          (store) => store.slug === state.selectedStoreSlug,
-        )
+        !state.selectedStoreId ||
+        !action.payload.some((store) => store.id === state.selectedStoreId)
       ) {
-        state.selectedStoreSlug = action.payload[0]?.slug ?? null;
+        state.selectedStoreId = action.payload[0]?.id ?? null;
       }
     },
 
-    setSelectedStoreSlug(state, action: PayloadAction<string>) {
-      if (
-        state.stores.some((store) => store.slug === action.payload)
-      ) {
-        state.selectedStoreSlug = action.payload;
+    setSelectedStoreId(state, action: PayloadAction<string>) {
+      if (state.stores.some((store) => store.id === action.payload)) {
+        state.selectedStoreId = action.payload;
       }
     },
 
     clearStores(state) {
       state.stores = [];
-      state.selectedStoreSlug = null;
+      state.selectedStoreId = null;
     },
   },
 });
 
-export const {
-  setStores,
-  setSelectedStoreSlug,
-  clearStores,
-} = storeSlice.actions;
+export const { setStores, setSelectedStoreId, clearStores } =
+  storeSlice.actions;
 
 export default storeSlice.reducer;
