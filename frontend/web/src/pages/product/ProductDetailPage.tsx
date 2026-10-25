@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useProduct } from "../../features/product/hooks/useProducts";
@@ -21,11 +21,13 @@ export function ProductDetailPage() {
   const { productId } = useParams();
   const { data: product, isLoading, isError } = useProduct(productId);
 
-  const [selectedVariantId, setSelectedVariantId] = useState("");
+  const [variantSelection, setVariantSelection] = useState({
+    productId: "",
+    variantId: "",
+  });
 
-  useEffect(() => {
-    setSelectedVariantId("");
-  }, [productId]);
+  const selectedVariantId =
+    variantSelection.productId === productId ? variantSelection.variantId : "";
 
   if (isLoading) {
     return <main className="container py-4">Loading product...</main>;
@@ -211,7 +213,10 @@ export function ProductDetailPage() {
                             disabled={!matchingVariant}
                             onClick={() => {
                               if (matchingVariant) {
-                                setSelectedVariantId(matchingVariant.id);
+                                setVariantSelection({
+                                  productId: productId ?? "",
+                                  variantId: matchingVariant.id,
+                                });
                               }
                             }}
                             className={

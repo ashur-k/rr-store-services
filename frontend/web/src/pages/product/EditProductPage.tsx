@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Alert, Container, Form, Spinner } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -64,6 +64,12 @@ function initialiseVariants(product: Product): VariantForm[] {
   }));
 }
 
+interface EditProductFormProps {
+  product: Product;
+  productId: string;
+  storeId: string;
+}
+
 export function EditProductPage() {
   const { productId } = useParams<{ productId: string }>();
   const [searchParams] = useSearchParams();
@@ -76,6 +82,72 @@ export function EditProductPage() {
     isLoading: productLoading,
     isError: productError,
   } = useProduct(productId);
+
+  if (!productId || !storeId) {
+    return (
+      <Container className="py-4">
+        <Alert variant="danger">
+          Product ID or store ID is missing. Please open Edit from your store's
+          product list.
+        </Alert>
+        <Button type="button" onClick={() => navigate("/store-owner")}>
+          Back to Store
+        </Button>
+      </Container>
+    );
+  }
+
+  if (productLoading) {
+    return (
+      <Container className="py-4">
+        <Spinner size="sm" className="me-2" />
+        Loading product...
+      </Container>
+    );
+  }
+
+  if (productError || !product) {
+    return (
+      <Container className="py-4">
+        <Alert variant="danger">
+          Could not load this product. Please try again.
+        </Alert>
+        <Button type="button" onClick={() => navigate("/store-owner")}>
+          Back to Store
+        </Button>
+      </Container>
+    );
+  }
+
+  if (product.store_id !== storeId) {
+    return (
+      <Container className="py-4">
+        <Alert variant="danger">
+          This product does not belong to the selected store.
+        </Alert>
+        <Button type="button" onClick={() => navigate("/store-owner")}>
+          Back to Store
+        </Button>
+      </Container>
+    );
+  }
+
+  return (
+    <EditProductForm
+      key={product.id}
+      product={product}
+      productId={productId}
+      storeId={storeId}
+    />
+  );
+}
+
+function EditProductForm({
+  product,
+  productId,
+  storeId,
+}: EditProductFormProps) {
+  const navigate = useNavigate();
 
   const {
     data: colors = [],
@@ -91,43 +163,26 @@ export function EditProductPage() {
 
   const updateProduct = useUpdateProduct();
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [hasVariants, setHasVariants] = useState(false);
-  const [rate, setRate] = useState("0");
-  const [newEdition, setNewEdition] = useState(false);
-  const [discount30Percent, setDiscount30Percent] = useState(false);
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("0");
-  const [images, setImages] = useState<string[]>([""]);
-  const [variants, setVariants] = useState<VariantForm[]>([
-    createEmptyVariant(),
-  ]);
+  // Initialize form state directly from the loaded product.
+  const [name, setName] = useState(product.name);
+  const [description, setDescription] = useState(product.description ?? "");
+  const [categoryId, setCategoryId] = useState(product.category_id ?? "");
+  const [hasVariants, setHasVariants] = useState(product.has_variants);
+  const [rate, setRate] = useState(String(product.rate));
+  const [newEdition, setNewEdition] = useState(product.new_edition);
+  const [discount30Percent, setDiscount30Percent] = useState(
+    product.discount_30_percent,
+  );
+  const [price, setPrice] = useState(String(product.price ?? ""));
+  const [stock, setStock] = useState(String(product.stock ?? 0));
+  const [images, setImages] = useState<string[]>(() =>
+    imageUrls(product.images),
+  );
+  const [variants, setVariants] = useState<VariantForm[]>(() =>
+    initialiseVariants(product),
+  );
 
-  // Track expanded variants independently.
   const [expandedVariants, setExpandedVariants] = useState<number[]>([]);
-
-  useEffect(() => {
-    if (!product) {
-      return;
-    }
-
-    setName(product.name);
-    setDescription(product.description ?? "");
-    setCategoryId(product.category_id ?? "");
-    setHasVariants(product.has_variants);
-    setRate(String(product.rate));
-    setNewEdition(product.new_edition);
-    setDiscount30Percent(product.discount_30_percent);
-    setPrice(product.price ?? "");
-    setStock(String(product.stock ?? 0));
-    setImages(imageUrls(product.images));
-    setVariants(initialiseVariants(product));
-
-    // Start with all variants collapsed when the product loads.
-    setExpandedVariants([]);
-  }, [product]);
 
   const toggleVariant = (index: number) => {
     setExpandedVariants((current) =>
@@ -147,10 +202,6 @@ export function EditProductPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!productId || !storeId || !product) {
-      return;
-    }
 
     const productData: ProductUpdate = {
       name: name.trim(),
@@ -202,55 +253,6 @@ export function EditProductPage() {
       // Display the mutation error below.
     }
   };
-
-  if (!productId || !storeId) {
-    return (
-      <Container className="py-4">
-        <Alert variant="danger">
-          Product ID or store ID is missing. Please open Edit from your store's
-          product list.
-        </Alert>
-        <Button type="button" onClick={() => navigate("/store-owner")}>
-          Back to Store
-        </Button>
-      </Container>
-    );
-  }
-
-  if (productLoading) {
-    return (
-      <Container className="py-4">
-        <Spinner size="sm" className="me-2" />
-        Loading product...
-      </Container>
-    );
-  }
-
-  if (productError || !product) {
-    return (
-      <Container className="py-4">
-        <Alert variant="danger">
-          Could not load this product. Please try again.
-        </Alert>
-        <Button type="button" onClick={() => navigate("/store-owner")}>
-          Back to Store
-        </Button>
-      </Container>
-    );
-  }
-
-  if (product.store_id !== storeId) {
-    return (
-      <Container className="py-4">
-        <Alert variant="danger">
-          This product does not belong to the selected store.
-        </Alert>
-        <Button type="button" onClick={() => navigate("/store-owner")}>
-          Back to Store
-        </Button>
-      </Container>
-    );
-  }
 
   return (
     <Container className="py-4">
@@ -386,6 +388,7 @@ export function EditProductPage() {
           imageUrls={images}
           onChange={setImages}
         />
+
         {hasVariants && (
           <section className="mb-4">
             <h2 className="h5 mb-3">Product Variants</h2>
