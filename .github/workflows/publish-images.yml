@@ -69,6 +69,15 @@ jobs:
           tags: |
             ghcr.io/ashur-k/rr-store-services-store-service:${{ github.event.workflow_run.head_sha }}
 
+      - name: Build and push product-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/product-service
+          file: ./services/product-service/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ashur-k/rr-store-services-product-service:${{ github.event.workflow_run.head_sha }}
+
       - name: Build and push frontend/nginx
         uses: docker/build-push-action@v6
         with:

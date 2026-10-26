@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+RELEASES_DIR="/opt/rr-store/releases"
+ENV_FILE="/opt/rr-store/production.env"
+DEPLOYED_SHA_FILE="/opt/rr-store/deployed-sha"
+LOCK_FILE="/run/lock/rr-store-deploy.lock"
+RUNNER_WORK_DIR="/home/ashur_hp_grey/actions-runner/_work"
+
+IMAGE_TAG=""
+SOURCE_DIR="${1:-}"
+
+if ! IFS= read -r IMAGE_TAG; then
+    echo "Error: Expected commit SHA on standard input." >&2
+    exit 2
+fi
+
+if [[ ! "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Error: Invalid commit SHA." >&2
+    exit 2
+fi
+
+if [[ -z "$SOURCE_DIR" || ! -d "$SOURCE_DIR/.git" ]]; then
+    echo "Error: Valid GitHub Actions checkout is required." >&2
+    exit 2
+fi
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Error: Must run as root." >&2
+    exit 1
+fi
+
+SOURCE_DIR="$(realpath -e "$SOURCE_DIR")"
+RUNNER_WORK_DIR="$(realpath -e "$RUNNER_WORK_DIR")"
+
+case "$SOURCE_DIR/" in
+    "$RUNNER_WORK_DIR"/*) ;;
+    *)
+        echo "Error: Source directory is outside the runner workspace." >&2
+        exit 1
+        ;;
+esac
+
+git_safe() {
+    git -c "safe.directory=$SOURCE_DIR" -C "$SOURCE_DIR" "$@"
+}
+
+if [[ "$(git_safe rev-parse HEAD)" != "$IMAGE_TAG" ]]; then
+    echo "Error: Checkout SHA does not match published image SHA." >&2
+    exit 1
+fi
+
+if [[ -n "$(git_safe status --porcelain)" ]]; then
+    echo "Error: Checkout contains uncommitted changes." >&2
+    exit 1
+fi
+
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "Error: Production environment file is missing." >&2
+    exit 1
+fi
+
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+    echo "Error: Another deployment is running." >&2
+    exit 1
+fi
+
+mkdir -p "$RELEASES_DIR"
+RELEASE_DIR="$RELEASES_DIR/$IMAGE_TAG"
+
+if [[ -e "$RELEASE_DIR" ]]; then
+    if [[ ! -f "$RELEASE_DIR/.release-sha" ]] ||
+       [[ "$(cat "$RELEASE_DIR/.release-sha")" != "$IMAGE_TAG" ]]; then
+        echo "Error: Existing release failed verification." >&2
+        exit 1
+    fi
+else
+    TEMP_DIR="$(mktemp -d "$RELEASES_DIR/.release-${IMAGE_TAG}.XXXXXX")"
+    trap 'rm -rf "${TEMP_DIR:-}"' EXIT
+
+    echo "Preparing release $IMAGE_TAG..."
+    git_safe archive "$IMAGE_TAG" | tar -x -C "$TEMP_DIR"
+    printf '%s\n' "$IMAGE_TAG" > "$TEMP_DIR/.release-sha"
+    chmod -R a-w "$TEMP_DIR"
+    mv "$TEMP_DIR" "$RELEASE_DIR"
+    trap - EXIT
+fi
+
+DEPLOY_SCRIPT="$RELEASE_DIR/infrastructure/production/scripts/deploy.sh"
+
+if [[ ! -f "$DEPLOY_SCRIPT" ]]; then
+    echo "Error: Release deployment script is missing." >&2
+    exit 1
+fi
+
+echo "Deploying release $IMAGE_TAG..."
+bash "$DEPLOY_SCRIPT" "$IMAGE_TAG" "$RELEASE_DIR"
+
+TEMP_SHA_FILE="${DEPLOYED_SHA_FILE}.tmp"
+printf '%s\n' "$IMAGE_TAG" > "$TEMP_SHA_FILE"
+mv "$TEMP_SHA_FILE" "$DEPLOYED_SHA_FILE"
+
+echo "Deployment completed for $IMAGE_TAG."

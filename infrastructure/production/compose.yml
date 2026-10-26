@@ -109,6 +109,40 @@ services:
     networks:
       - backend
 
+  product-service-migrate:
+    image: ghcr.io/ashur-k/rr-store-services-product-service:${IMAGE_TAG:?Set IMAGE_TAG}
+    environment:
+      DATABASE_URL: postgresql+asyncpg://product_service:${PRODUCT_SERVICE_DB_PASSWORD:?Set PRODUCT_SERVICE_DB_PASSWORD in .env}@postgres:5432/product-service
+      KC_SERVER_URL: http://keycloak:8080
+      KC_BROWSER_SERVER_URL: ${KC_BROWSER_SERVER_URL:?Set KC_BROWSER_SERVER_URL in .env}
+      KC_REALM: ${KC_REALM:?Set KC_REALM in .env}
+      KC_AUDIENCE: ${KC_AUDIENCE:-account}
+      STORE_SERVICE_URL: http://store-service:8000
+    command: ["uv", "run", "alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: "no"
+
+  product-service:
+    image: ghcr.io/ashur-k/rr-store-services-product-service:${IMAGE_TAG:?Set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://product_service:${PRODUCT_SERVICE_DB_PASSWORD:?Set PRODUCT_SERVICE_DB_PASSWORD in .env}@postgres:5432/product-service
+      KC_SERVER_URL: http://keycloak:8080
+      KC_BROWSER_SERVER_URL: ${KC_BROWSER_SERVER_URL:?Set KC_BROWSER_SERVER_URL in .env}
+      KC_REALM: ${KC_REALM:?Set KC_REALM in .env}
+      KC_AUDIENCE: ${KC_AUDIENCE:-account}
+      STORE_SERVICE_URL: http://store-service:8000
+    command: ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
   kong:
     image: kong:3.9
     restart: unless-stopped
@@ -124,6 +158,7 @@ services:
     depends_on:
       - user-service
       - store-service
+      - product-service
     networks:
       - backend
 
@@ -135,6 +170,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       USER_SERVICE_DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD:?Set USER_SERVICE_DB_PASSWORD in .env}
       STORE_SERVICE_DB_PASSWORD: ${STORE_SERVICE_DB_PASSWORD:?Set STORE_SERVICE_DB_PASSWORD in .env}
+      PRODUCT_SERVICE_DB_PASSWORD: ${PRODUCT_SERVICE_DB_PASSWORD:?Set PRODUCT_SERVICE_DB_PASSWORD in .env}
       KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Set KEYCLOAK_DB_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql
