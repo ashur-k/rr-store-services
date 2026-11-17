@@ -57,6 +57,9 @@ compose pull \
     user-service-outbox-worker \
     nginx
 
+echo "Starting infrastructure services..."
+compose up -d --wait postgres rabbitmq redis keycloak
+
 echo "Ensuring Product Service database and role exist..."
 
 compose run --rm --no-deps --entrypoint sh postgres -c \
