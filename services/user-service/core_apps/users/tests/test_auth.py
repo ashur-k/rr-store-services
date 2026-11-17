@@ -13,7 +13,6 @@ from ..auth import KeycloakOIDCAuthenticationBackend
 
 
 class KeycloakJWTAuthenticationTests(TestCase):
-
     def test_authenticate_finds_existing_user_by_kc_id(self):
         kc_id = uuid4()
 
@@ -60,7 +59,6 @@ class KeycloakJWTAuthenticationTests(TestCase):
         self.assertEqual(authenticated_user.kc_id, kc_id)
         self.assertEqual(authenticated_user.email, "test@example.com")
         self.assertEqual(token, payload)
-
 
     def test_authenticate_syncs_user_roles_from_keycloak(self):
         kc_id = uuid4()
@@ -169,7 +167,6 @@ class KeycloakJWTAuthenticationTests(TestCase):
 
 
 class KeycloakOIDCAuthenticationBackendTests(TestCase):
-
     def test_create_user_from_keycloak_claims(self):
         claims = {
             "sub": str(uuid4()),
@@ -189,4 +186,3 @@ class KeycloakOIDCAuthenticationBackendTests(TestCase):
         self.assertEqual(user.email, "oidc@example.com")
         self.assertEqual(user.first_name, "OIDC")
         self.assertEqual(user.last_name, "User")
-

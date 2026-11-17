@@ -12,8 +12,10 @@ from ..permissions import keycloak_role_required
 @permission_classes([IsAuthenticated, keycloak_role_required("staff")])
 def protected_report(request):
     """Generate a report. Requires 'staff' role."""
-    return Response({
-        "report": "Monthly authentication summary",
-        "generated_by": request.user.username,
-        "generated_at": datetime.now(timezone.utc),
-    })
+    return Response(
+        {
+            "report": "Monthly authentication summary",
+            "generated_by": request.user.username,
+            "generated_at": datetime.now(timezone.utc),
+        }
+    )

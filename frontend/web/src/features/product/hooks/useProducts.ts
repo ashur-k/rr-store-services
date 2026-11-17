@@ -13,10 +13,12 @@ import {
 
 import type { ProductCreate, ProductUpdate } from "../api/types";
 
+// TODO I NEED TO  FETCH BACKEND CATEFORES WITH PRODCUT SO NOT call t differnt endpoint to get data
 export function useProducts() {
   return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
+    staleTime: 10000,
   });
 }
 

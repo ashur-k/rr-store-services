@@ -53,11 +53,7 @@ class KeycloakOIDCAuthenticationBackend(OIDCAuthenticationBackend):
 
         # Map Keycloak roles to Django staff/superuser flags
         realm_roles = claims.get("realm_access", {}).get("roles", [])
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
         all_roles = set(realm_roles + client_roles)
 
         user.is_staff = "staff" in all_roles or "admin" in all_roles
@@ -152,11 +148,7 @@ class KeycloakJWTAuthentication(BaseAuthentication):
         user.email = claims.get("email", "")
 
         realm_roles = claims.get("realm_access", {}).get("roles", [])
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
         all_roles = set(realm_roles + client_roles)
 
         user.is_staff = "staff" in all_roles or "admin" in all_roles

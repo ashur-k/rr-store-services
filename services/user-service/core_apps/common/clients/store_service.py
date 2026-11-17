@@ -9,10 +9,12 @@ class StoreServiceClient:
 
     def __init__(
         self,
+        http_client: httpx.AsyncClient,
         base_url: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> None:
+        self.http_client = http_client
         self.base_url = (base_url or settings.STORE_SERVICE_URL).rstrip("/")
         self.client_id = client_id or settings.STORE_SERVICE_M2M_CLIENT_ID
         self.client_secret = client_secret or settings.STORE_SERVICE_M2M_CLIENT_SECRET
@@ -51,16 +53,15 @@ class StoreServiceClient:
         """Request a service-account access token asynchronously."""
         token_url = f"{KEYCLOAK.server_url.rstrip('/')}/realms/{KEYCLOAK.realm}/protocol/openid-connect/token"
 
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.post(
-                token_url,
-                data={
-                    "grant_type": "client_credentials",
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                },
-            )
-            response.raise_for_status()
+        response = await self.http_client.post(
+            token_url,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            },
+        )
+        response.raise_for_status()
 
         return response.json()["access_token"]
 
@@ -68,15 +69,15 @@ class StoreServiceClient:
         """Retrieve all stores asynchronously."""
         token = await self._get_access_token_async()
 
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(
-                f"{self.base_url}/all/",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-            if response.status_code == 401:
-                print("Store Service rejected the M2M token.")
-                print("Response:", response.text)
+        response = await self.http_client.get(
+            f"{self.base_url}/all/",
+            headers={"Authorization": f"Bearer {token}"},
+        )
 
-            response.raise_for_status()
+        if response.status_code == 401:
+            print("Store Service rejected the M2M token.")
+            print("Response:", response.text)
+
+        response.raise_for_status()
 
         return response.json()

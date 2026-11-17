@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     AdminUserListView,
+    ClearUserCacheView,
     HealthView,
     ItemListView,
     OIDCBackchannelLogoutView,
@@ -30,4 +31,9 @@ urlpatterns = [
     path("store-user/<int:user_id>/", StoreUserDetailView.as_view(), name="store-user-detail"),
     path("reports/", protected_report, name="protected-report"),
     path("oidc/backchannel-logout/", OIDCBackchannelLogoutView.as_view(), name="oidc-backchannel-logout"),
+    path(
+        "admin/cache/clear/",
+        ClearUserCacheView.as_view(),
+        name="clear-user-cache",
+    ),
 ]

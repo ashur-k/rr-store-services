@@ -53,9 +53,7 @@ class KeycloakLogoutService:
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Logout token has expired")
         except jwt.InvalidTokenError as exc:
-            raise AuthenticationFailed(
-                f"Invalid logout token: {exc}"
-            )
+            raise AuthenticationFailed(f"Invalid logout token: {exc}")
 
         self._validate_logout_event(payload)
 
@@ -65,31 +63,21 @@ class KeycloakLogoutService:
     def _validate_logout_event(payload):
         events = payload.get("events", {})
 
-        logout_event = (
-            "http://schemas.openid.net/event/backchannel-logout"
-        )
+        logout_event = "http://schemas.openid.net/event/backchannel-logout"
 
         if logout_event not in events:
-            raise AuthenticationFailed(
-                "Invalid logout token: missing backchannel logout event"
-            )
+            raise AuthenticationFailed("Invalid logout token: missing backchannel logout event")
 
         if not payload.get("sid") and not payload.get("sub"):
-            raise AuthenticationFailed(
-                "Invalid logout token: missing sid or sub"
-            )
+            raise AuthenticationFailed("Invalid logout token: missing sid or sub")
 
     def logout_session(self, keycloak_sid):
         try:
-            oidc_session = OIDCSession.objects.get(
-                keycloak_sid=keycloak_sid
-            )
+            oidc_session = OIDCSession.objects.get(keycloak_sid=keycloak_sid)
         except OIDCSession.DoesNotExist:
             return False
 
-        Session.objects.filter(
-            session_key=oidc_session.django_session_key
-        ).delete()
+        Session.objects.filter(session_key=oidc_session.django_session_key).delete()
 
         oidc_session.delete()
 
