@@ -19,7 +19,12 @@ from ..services import UserService
 class StoreListWithOwnersAsyncView(View):
     """Return stores with their owner details asynchronously."""
 
-    async def get(self, request):
+    @inject
+    async def get(
+        self,
+        request,
+        user_service: UserService = Provide[Container.user_service],
+    ):
         drf_request = Request(
             request,
             authenticators=[KeycloakJWTAuthentication()],
@@ -45,7 +50,6 @@ class StoreListWithOwnersAsyncView(View):
                 status=403,
             )
 
-        user_service = Container.user_service()
         stores = await user_service.aget_stores_with_owners()
 
         return JsonResponse(stores, safe=False, status=200)

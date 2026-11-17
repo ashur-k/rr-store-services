@@ -151,6 +151,7 @@ services:
     depends_on:
       - user-service
       - frontend
+      - kong
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles

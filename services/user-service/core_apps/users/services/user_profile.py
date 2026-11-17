@@ -7,11 +7,7 @@ class UserProfileService:
     def get_profile(self, user, claims):
         realm_roles = claims.get("realm_access", {}).get("roles", [])
 
-        client_roles = (
-            claims.get("resource_access", {})
-            .get(settings.OIDC_RP_CLIENT_ID, {})
-            .get("roles", [])
-        )
+        client_roles = claims.get("resource_access", {}).get(settings.OIDC_RP_CLIENT_ID, {}).get("roles", [])
 
         return {
             "id": user.id,

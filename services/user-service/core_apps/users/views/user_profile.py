@@ -16,10 +16,10 @@ class UserProfileView(APIView):
 
     @inject
     def get(
-            self,
-            request,
-            profile_service: UserProfileService = Provide[Container.user_profile_service],
-        ):
+        self,
+        request,
+        profile_service: UserProfileService = Provide[Container.user_profile_service],
+    ):
         claims = getattr(request.user, "keycloak_claims", {})
 
         if isinstance(request.auth, dict):
