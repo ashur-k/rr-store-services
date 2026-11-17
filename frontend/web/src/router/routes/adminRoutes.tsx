@@ -16,7 +16,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: "admin",
+    path: "rr-store-admin",
     element: (
       <RoleProtectedRoute roles={["admin"]}>
         <AdminPage />

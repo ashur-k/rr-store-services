@@ -50,7 +50,7 @@ function Header() {
               {isAuthenticated ? (
                 <>
                   {stores.length > 0 && (
-                    <Nav.Link as={Link} to="/admin">
+                    <Nav.Link as={Link} to="/rr-store-admin">
                       <i className="fas fa-store m-1"></i>
                       Admin
                     </Nav.Link>
