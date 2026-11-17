@@ -5,9 +5,11 @@ import type { DataTableColumn } from "../../components/tables/DataTable";
 import { DataTable } from "../../components/tables/DataTable";
 import { useStoresWithOwners } from "../../features/users/hooks/useStoresWithOwners";
 import type { StoreWithOwner } from "../../features/users/types";
+import { useClearUserCache } from "../../features/users/hooks/useClearUserCache";
 
-export function StorePage() {
+export function AdminPage() {
   const navigate = useNavigate();
+  const clearCacheMutation = useClearUserCache();
 
   const { data: stores = [], isLoading, isError } = useStoresWithOwners();
 
@@ -68,6 +70,14 @@ export function StorePage() {
           >
             <i className="fas fa-user-plus me-2" />
             Create Store User
+          </Button>
+          <Button
+            variant="outline-danger"
+            onClick={() => clearCacheMutation.mutate()}
+            disabled={clearCacheMutation.isPending}
+          >
+            <i className="fas fa-trash-alt me-2" />
+            {clearCacheMutation.isPending ? "Clearing Cache..." : "Clear User Cache"}
           </Button>
         </div>
       </div>

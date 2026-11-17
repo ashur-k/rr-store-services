@@ -17,6 +17,7 @@ services:
     depends_on:
       - postgres
       - mailhog
+      - redis
     command:
       sh -c "
         uv sync &&
@@ -205,6 +206,27 @@ services:
     networks:
       - rr-store
 
+  redis:
+      image: redis:8
+      command:
+        - redis-server
+        - --appendonly
+        - "yes"
+        - --maxmemory
+        - 256mb
+        - --maxmemory-policy
+        - allkeys-lru
+      volumes:
+        - redis_data:/data
+      restart: unless-stopped
+      healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
+      networks:
+        - rr-store
+  
 networks:
   rr-store:
     driver: bridge
@@ -217,3 +239,4 @@ volumes:
   media_volume:
   frontend_dist:
   local_postgres_data: {}
+  redis_data: {}
