@@ -24,7 +24,7 @@ class KeycloakSettings(BaseSettings):
     @property
     def internal_base(self) -> str:
         return f"{self.server_url}/realms/{self.realm}"
-    
+
     @property
     def public_base(self) -> str:
         return f"{self.browser_server_url}/realms/{self.realm}"

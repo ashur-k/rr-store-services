@@ -164,9 +164,10 @@ class KeycloakClient:
         try:
             role = await self._client.a_get_realm_role(role_name)
             return await self._client.a_get_realm_role_members(role_name=role["name"])
-        except (
-            KeycloakAuthenticationError,
-            KeycloakConnectionError,
-            KeycloakGetError,
-        ) as exc:
+        except Exception as exc:
+            logger.exception(
+                "Failed to retrieve users with realm role '%s': %s",
+                role_name,
+                exc,
+            )
             raise KeycloakError(f"Failed to retrieve users with realm role '{role_name}'.") from exc

@@ -6,7 +6,6 @@ from ...services import UserProfileService
 
 
 class UserProfileServiceTests(TestCase):
-
     def test_get_profile_returns_user_and_keycloak_data(self):
         user = Mock(
             email="ashur@example.com",

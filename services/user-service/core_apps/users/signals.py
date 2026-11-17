@@ -6,7 +6,7 @@ from core_apps.users.models import OIDCSession
 
 @receiver(user_logged_in)
 def create_oidc_session(sender, request, user, **kwargs):
-    
+
     keycloak_sid = request.session.get("keycloak_sid")
 
     if not keycloak_sid:

@@ -17,7 +17,9 @@ class UserRepository:
         user.email = email
         user.username = email
 
-        user.save(update_fields=("email", "username"),)
+        user.save(
+            update_fields=("email", "username"),
+        )
 
         return user
 

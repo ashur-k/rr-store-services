@@ -3,7 +3,6 @@ from rest_framework.test import APITestCase
 
 
 class HealthViewTests(APITestCase):
-
     def test_health_check_returns_healthy(self):
         response = self.client.get("/api/users/health/")
 

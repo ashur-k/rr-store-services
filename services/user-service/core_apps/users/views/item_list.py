@@ -9,7 +9,8 @@ from ..serializers import ItemSerializer
 
 
 class ItemListView(APIView):
-    """ List items. Requires 'staff' role. """
+    """List items. Requires 'staff' role."""
+
     permission_classes = [IsAuthenticated, IsKeycloakStaff]
 
     def get(self, request):

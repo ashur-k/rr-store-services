@@ -1,4 +1,5 @@
 from .admin_user_list import AdminUserListView
+from .cache import ClearUserCacheView
 from .health import HealthView
 from .item_list import ItemListView
 from .logout import OIDCBackchannelLogoutView
@@ -19,4 +20,5 @@ __all__ = [
     "StoreUserListCreateView",
     "StoreUserDetailView",
     "StoreListWithOwnersAsyncView",
+    "ClearUserCacheView",
 ]

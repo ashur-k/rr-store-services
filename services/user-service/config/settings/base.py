@@ -90,6 +90,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 DATABASES = {
     "default": {
@@ -268,4 +269,9 @@ RABBITMQ = {
 STORE_SERVICE_URL = env(
     "STORE_SERVICE_URL",
     default="http://store-service:8000",
+)
+
+REDIS_URL = env(
+    "REDIS_URL",
+    default="redis://redis:6379/0",
 )

@@ -1,7 +1,12 @@
+from contextlib import asynccontextmanager
+
+import httpx
 from dependency_injector import containers, providers
 from django.conf import settings
+from redis.asyncio import Redis
 
 from config.rabbitmq import RabbitMQConnection
+from core_apps.common.cache import CacheService
 from core_apps.common.clients import StoreServiceClient
 from core_apps.common.events import EventDispatcher, UserCreated
 from core_apps.outbox.handlers import UserCreatedOutboxHandler
@@ -21,9 +26,45 @@ def create_event_dispatcher(
     return dispatcher
 
 
+@asynccontextmanager
+async def init_http_client():
+    client = httpx.AsyncClient(timeout=5.0)
+    try:
+        yield client
+    finally:
+        await client.aclose()
+
+
+@asynccontextmanager
+async def init_redis_client():
+    client = Redis.from_url(
+        settings.REDIS_URL,
+        decode_responses=True,
+        socket_connect_timeout=2,
+        socket_timeout=2,
+    )
+    try:
+        yield client
+    finally:
+        await client.aclose()
+
+
 # TODO revisit how I want to architect PDI container
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
+
+    http_client = providers.Resource(
+        init_http_client,
+    )
+
+    redis_client = providers.Resource(
+        init_redis_client,
+    )
+
+    cache_service = providers.Singleton(
+        CacheService,
+        redis=redis_client,
+    )
 
     keycloak_logout_service = providers.Factory(
         KeycloakLogoutService,
@@ -60,6 +101,7 @@ class Container(containers.DeclarativeContainer):
 
     store_service_client = providers.Singleton(
         StoreServiceClient,
+        http_client=http_client,
         base_url=settings.STORE_SERVICE_URL,
         client_id=settings.STORE_SERVICE_M2M_CLIENT_ID,
         client_secret=settings.STORE_SERVICE_M2M_CLIENT_SECRET,
@@ -73,6 +115,7 @@ class Container(containers.DeclarativeContainer):
         profile_repository=profile_repository,
         event_dispatcher=event_dispatcher,
         store_service_client=store_service_client,
+        cache_service=cache_service,
     )
 
     rabbitmq_connection = providers.Singleton(
@@ -87,11 +130,4 @@ class Container(containers.DeclarativeContainer):
     outbox_publisher = providers.Factory(
         OutboxPublisher,
         event_publisher=rabbitmq_event_publisher,
-    )
-
-    store_service_client = providers.Singleton(
-        StoreServiceClient,
-        base_url=settings.STORE_SERVICE_URL,
-        client_id=settings.STORE_SERVICE_M2M_CLIENT_ID,
-        client_secret=settings.STORE_SERVICE_M2M_CLIENT_SECRET,
     )

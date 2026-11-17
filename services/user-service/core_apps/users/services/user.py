@@ -3,7 +3,9 @@ import logging
 
 from django.db import transaction
 
+from core_apps.common.cache import CacheService
 from core_apps.common.clients import StoreServiceClient
+from core_apps.common.decorators import cached
 from core_apps.common.events import EventDispatcher
 from core_apps.common.exceptions import (
     KeycloakUserNotFoundError,
@@ -39,6 +41,7 @@ class UserService:
         profile_repository: ProfileRepository,
         event_dispatcher: EventDispatcher,
         store_service_client: StoreServiceClient,
+        cache_service: CacheService,
     ) -> None:
         self.keycloak_client = keycloak_client
         self.user_selector = user_selector
@@ -46,6 +49,7 @@ class UserService:
         self.profile_repository = profile_repository
         self.event_dispatcher = event_dispatcher
         self.store_service_client = store_service_client
+        self.cache_service = cache_service
 
     def get_users(self) -> list[User]:
         """Return all Django users."""
@@ -215,6 +219,10 @@ class UserService:
             if user["id"] in local_users_by_kc_id
         ]
 
+    @cached(
+        key="users:stores-with-owners:v1",
+        ttl_seconds=12 * 60 * 60,
+    )
     async def aget_stores_with_owners(self) -> list[dict]:
         """Return stores combined with their owner details."""
 

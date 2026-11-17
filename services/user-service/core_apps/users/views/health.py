@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 
 
 class HealthView(APIView):
-    """ Public health check endpoint. """
+    """Public health check endpoint."""
+
     permission_classes = [AllowAny]
 
     def get(self, request):
