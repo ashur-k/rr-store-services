@@ -15,9 +15,13 @@ class ClearUserCacheView(APIView):
     def post(
         self,
         request,
-        cache_service=Provide[Container.cache_service],
+        cache_service_provider=Provide[Container.cache_service.provider],
     ):
-        deleted = async_to_sync(cache_service.clear_namespace)("users:")
+        async def clear_cache():
+            cache_service = await cache_service_provider()
+            return await cache_service.clear_namespace("users:")
+
+        deleted = async_to_sync(clear_cache)()
 
         return Response(
             {

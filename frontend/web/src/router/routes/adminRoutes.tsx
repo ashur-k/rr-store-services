@@ -1,8 +1,8 @@
 import type { RouteObject } from "react-router-dom";
 
 import { RoleProtectedRoute } from "../../components/auth/RoleProtectedRoute";
-import { CreateStorePage } from "../../pages/store/CreateStorePage";
-import { StorePage } from "../../pages/store/StorePage";
+import { CreateStorePage } from "../../pages/admin/CreateStorePage";
+import { AdminPage } from "../../pages/admin/AdminPage";
 import { CreateStoreUserPage } from "../../pages/users/CreateStoreUserPage";
 import { ManageUsersPage } from "../../pages/users/ManageUsersPage";
 
@@ -16,10 +16,10 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: "store",
+    path: "admin",
     element: (
       <RoleProtectedRoute roles={["admin"]}>
-        <StorePage />
+        <AdminPage />
       </RoleProtectedRoute>
     ),
   },
