@@ -29,6 +29,7 @@ services:
       STORE_SERVICE_M2M_CLIENT_ID: ${STORE_SERVICE_M2M_CLIENT_ID:?Set STORE_SERVICE_M2M_CLIENT_ID in .env}
       STORE_SERVICE_M2M_CLIENT_SECRET: ${STORE_SERVICE_M2M_CLIENT_SECRET:?Set STORE_SERVICE_M2M_CLIENT_SECRET in .env}
       STORE_SERVICE_URL: http://store-service:8000
+      REDIS_URL: redis://redis:6379/0
     command:
       - sh
       - -c
@@ -41,6 +42,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      
     networks:
       - backend
 
@@ -201,6 +205,27 @@ services:
       retries: 5
       start_period: 30s
 
+  redis:
+    image: redis:8
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+  
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
     restart: unless-stopped
@@ -252,3 +277,4 @@ volumes:
   rabbitmq_data:
   user_staticfiles:
   user_mediafiles:
+  redis_data: {}
