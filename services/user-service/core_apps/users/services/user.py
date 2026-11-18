@@ -41,7 +41,7 @@ class UserService:
         profile_repository: ProfileRepository,
         event_dispatcher: EventDispatcher,
         store_service_client: StoreServiceClient,
-        cache_service: CacheService,
+        cache_service: CacheService | None = None,
     ) -> None:
         self.keycloak_client = keycloak_client
         self.user_selector = user_selector
