@@ -53,12 +53,24 @@ async def init_redis_client():
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
 
-    http_client = providers.Resource(
-        init_http_client,
+    # Async resources
+    http_client = providers.Resource(init_http_client)
+    redis_client = providers.Resource(init_redis_client)
+    
+     # Shared infrastructure
+    keycloak_client = providers.Singleton(KeycloakClient)
+
+    user_selector = providers.Factory(UserSelector)
+    user_repository = providers.Factory(UserRepository)
+    profile_repository = providers.Factory(ProfileRepository)
+
+    user_created_outbox_handler = providers.Factory(
+        UserCreatedOutboxHandler,
     )
 
-    redis_client = providers.Resource(
-        init_redis_client,
+    event_dispatcher = providers.Singleton(
+        create_event_dispatcher,
+        user_created_handler=user_created_outbox_handler,
     )
 
     cache_service = providers.Singleton(
@@ -73,33 +85,16 @@ class Container(containers.DeclarativeContainer):
     user_profile_service = providers.Factory(
         UserProfileService,
     )
-
-    keycloak_client = providers.Singleton(
-        KeycloakClient,
-    )
-
-    user_selector = providers.Factory(
-        UserSelector,
-    )
-
-    user_repository = providers.Factory(
-        UserRepository,
-    )
-
-    profile_repository = providers.Factory(
-        ProfileRepository,
-    )
-
-    user_created_outbox_handler = providers.Factory(
-        UserCreatedOutboxHandler,
-    )
-
-    event_dispatcher = providers.Singleton(
-        create_event_dispatcher,
-        user_created_handler=user_created_outbox_handler,
-    )
-
+ # Synchronous Store Service client
     store_service_client = providers.Singleton(
+        StoreServiceClient,
+        base_url=settings.STORE_SERVICE_URL,
+        client_id=settings.STORE_SERVICE_M2M_CLIENT_ID,
+        client_secret=settings.STORE_SERVICE_M2M_CLIENT_SECRET,
+    )
+
+    # Asynchronous Store Service client
+    async_store_service_client = providers.Singleton(
         StoreServiceClient,
         http_client=http_client,
         base_url=settings.STORE_SERVICE_URL,
@@ -107,6 +102,13 @@ class Container(containers.DeclarativeContainer):
         client_secret=settings.STORE_SERVICE_M2M_CLIENT_SECRET,
     )
 
+    # Async caching
+    cache_service = providers.Singleton(
+        CacheService,
+        redis=redis_client,
+    )
+
+    # Existing synchronous service
     user_service = providers.Factory(
         UserService,
         keycloak_client=keycloak_client,
@@ -115,6 +117,17 @@ class Container(containers.DeclarativeContainer):
         profile_repository=profile_repository,
         event_dispatcher=event_dispatcher,
         store_service_client=store_service_client,
+    )
+
+    # Async service
+    async_user_service = providers.Factory(
+        UserService,
+        keycloak_client=keycloak_client,
+        user_selector=user_selector,
+        user_repository=user_repository,
+        profile_repository=profile_repository,
+        event_dispatcher=event_dispatcher,
+        store_service_client=async_store_service_client,
         cache_service=cache_service,
     )
 

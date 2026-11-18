@@ -15,7 +15,9 @@ export function RoleProtectedRoute({
 }: RoleProtectedRouteProps) {
   const { isAuthenticated, loading: authLoading } = useAuth();
 
-  const { data: user, isLoading: userLoading } = useCurrentUser();
+  const { data: user, isLoading: userLoading } = useCurrentUser({
+    enabled: !authLoading && isAuthenticated,
+  });
 
   if (authLoading || userLoading) {
     return <p>Loading...</p>;

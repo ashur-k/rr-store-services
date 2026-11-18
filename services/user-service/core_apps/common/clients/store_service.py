@@ -9,7 +9,7 @@ class StoreServiceClient:
 
     def __init__(
         self,
-        http_client: httpx.AsyncClient,
+        http_client: httpx.AsyncClient | None = None,
         base_url: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
@@ -51,6 +51,9 @@ class StoreServiceClient:
 
     async def _get_access_token_async(self) -> str:
         """Request a service-account access token asynchronously."""
+        
+        if self.http_client is None:
+            raise RuntimeError("Async HTTP client has not been configured.")
         token_url = f"{KEYCLOAK.server_url.rstrip('/')}/realms/{KEYCLOAK.realm}/protocol/openid-connect/token"
 
         response = await self.http_client.post(
@@ -67,6 +70,8 @@ class StoreServiceClient:
 
     async def get_all_stores_async(self) -> list[dict]:
         """Retrieve all stores asynchronously."""
+        if self.http_client is None:
+            raise RuntimeError("Async HTTP client has not been configured.")
         token = await self._get_access_token_async()
 
         response = await self.http_client.get(
