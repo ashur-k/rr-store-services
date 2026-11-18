@@ -23,7 +23,7 @@ class StoreListWithOwnersAsyncView(View):
     async def get(
         self,
         request,
-        user_service: UserService = Provide[Container.user_service],
+        user_service: UserService = Provide[Container.async_user_service],
     ):
         drf_request = Request(
             request,

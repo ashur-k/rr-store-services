@@ -33,7 +33,7 @@ export function CreateStoreUserPage() {
 
     createMutation.mutate(formData, {
       onSuccess: () => {
-        navigate("/store", {
+        navigate("/rr-store-admin", {
           state: { activeTab: "manage-store-users" },
         });
       },
@@ -95,7 +95,7 @@ export function CreateStoreUserPage() {
               <Button
                 variant="outline-secondary"
                 type="button"
-                onClick={() => navigate("/store")}
+                onClick={() => navigate("/rr-store-admin")}
               >
                 Cancel
               </Button>
